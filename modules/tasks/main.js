@@ -1,0 +1,121 @@
+Std.ui.module("filecxx_tasks",
+{
+    parent:"widget",
+    option:{
+        level:4,
+        width:"auto",
+        height:"auto",
+        className:"tasks_main",
+        padding:4
+    },
+
+    initialize:
+    {
+        init_layout()
+        {
+            this.layout_ = Std.ui("VBoxLayout",{
+                items:[]
+            });
+            this.layout(this.layout_);
+        },
+        init_actions:function()
+        {
+            this.actions = {
+                add:{
+                    text:lang("add"),
+                    icon:"icons/24/add.svg"
+                },
+                open:{
+                    text:lang("open"),
+                    icon:"icons/24/add_file.svg"
+                },
+                start:{
+                    text:lang("start"),
+                    icon:"icons/24/start.svg"
+                },
+                stop:{
+                    text:lang("stop"),
+                    icon:"icons/24/stop.svg"
+                },
+                remove:{
+                    text:lang("delete"),
+                    icon:"icons/24/delete.svg"
+                }
+            };
+        },
+        init_toolbar:function()
+        {
+            let actions = this.actions;
+
+            this.toolbar_ = Std.ui("ToolBar",{
+                iconWidth:24,
+                iconHeight:24,
+                items:[
+                    actions.add,
+                    actions.open,
+                    actions.start,
+                    actions.stop,
+                    actions.remove,
+                ]
+            });
+            this.layout_.append(this.toolbar_);
+        },
+        init_grid:function()
+        {
+            let actions = this.actions;
+
+            this.grid_ = Std.ui("Grid",{
+                rowNumbers:false,
+                rowHeight:32,
+                rowResizable:true,
+                rowExtensible:true,
+                rowNumberWidth:50,
+                cellEditable:false,
+                stripeRows:true,
+                //cellEditMode:"click",
+                //stripeRows:true,
+                //verticalLine:false,
+                //horizontalLine:false,
+                //columnCount:25,
+                //deferRender:false,
+                autoClean:true,
+                //columnSortable:true,
+                //columnCount:20,
+                columnDroppable:true,
+                columnResizable:true,
+                columnSortable:true,
+                selectionMode:"rows",
+                //selectionMarked:true,
+                //hoverMode:"row",
+                columns:[
+                    {name:"name",text:lang("name"),width:140},
+                    {name:"size",text:lang("size"),width:100},
+                    {name:"progress",text:lang("progress"),width:140},
+                    {name:"download_speed",text:lang("download_speed"),width:140},
+                    {name:"upload_speed",text:lang("upload_speed"),width:140},
+                    {name:"peers",text:lang("peers"),width:140},
+                    {name:"seeds",text:lang("seeds"),width:140},
+                    {name:"time_left",text:lang("time_left"),width:140},
+                    {name:"creation_time",text:lang("creation_time"),width:140},
+                    {name:"catalog",text:lang("catalog"),width:140},
+                ],
+
+                rowContextMenu:{
+                    items:[
+                        actions.start,
+                        actions.stop,
+                        actions.remove,
+                    ]
+                }
+            });
+            this.layout_.append(this.grid_);
+        }
+    },
+    main:function(that,opts){
+        that.init_layout();
+        that.init_actions();
+
+        that.init_toolbar();
+        that.init_grid();
+    }
+})

@@ -8,14 +8,17 @@
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
     <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="libs/ui/theme/all.css">
+
     <script src="libs/std.min.js"></script>
     <script src="libs/ui/ui.Label.js"></script>
     <script src="libs/ui/ui.Button.js"></script>
     <script src="libs/ui/ui.Edit.js"></script>
+    <script src="libs/ui/ui.SpinBox.js"></script>
     <script src="libs/ui/ui.DetailBar.js"></script>
     <script src="libs/ui/ui.Panel.js"></script>
     <script src="libs/ui/ui.TabPanel.js"></script>
     <script src="libs/ui/ui.Grid.js"></script>
+    <script src="libs/ui/ui.SplitButton.js"></script>
     <script src="libs/ui/ui.ToolBar.js"></script>
     <script src="libs/ui/ui.Image.js"></script>
     <script src="libs/ui/ui.Window.js"></script>
@@ -32,7 +35,11 @@
     <script src="libs/ui/ui.Menu.js"></script>
     <script src="libs/ui/ui.MenuBar.js"></script>
     <script src="libs/ui/ui.StatusBar.js"></script>
+
+    <script src="libs/filecxx_rpc.js"></script>
+
     <script src="config.js"></script>
+    <script src="modules/rpc.js"></script>
     <script src="modules/messages.js"></script>
     <script src="modules/tasks/main.js"></script>
     <script src="main.js"></script>
@@ -55,9 +62,25 @@
             border-bottom: 1px solid #eff0f1;
             background: transparent;
         }
+        .StdUI_Sep.statusbar_sep_{
+            outline: none;
+            width: 1px;
+            height: 22px;
+            margin: 0 8px 0 8px;
+            border-left: 1px solid #c8c9ca;
+            border-right: 1px solid #eff0f1;
+            background: transparent;
+        }
         .tasks_main
         {
             border: 1px solid #c8c9ca;
+        }
+        .StdUI_TabButton.tasks_tab_button.selected{
+            border-top: 2px solid #4aabdb;
+            padding: 0 12px 0 12px;
+        }
+        .StdUI_List.focused{
+            border-color: transparent;
         }
         a.url_link{
             color: #236484;

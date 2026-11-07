@@ -1,13 +1,33 @@
 var filecxx_wui =
 {
+    version: 1.0,
+    languages: {
+        "de_DE":"Deutsch",
+        "en_US":"English",
+        "eo_001":"esperanto",
+        "es_ES":"Español",
+        "fr_FR":"Français",
+        "id_ID":"Indonesia",
+        "it_IT":"Italiano",
+        "ja_JP":"日本語",
+        "ko_KR":"한국어",
+        "nl_NL":"Nederlands",
+        "pl_PL":"Polski",
+        "pt_BR":"português",
+        "ru_RU":"русский",
+        "tr_TR":"Türkçe",
+        "vi_VN":"Tiếng Việt",
+        "zh_CN":"简体中文",
+        "zh_TW":"繁體中文",
+    },
+
     lang:
     {
-        keywords:{},
-
-        name:function()
-        {
-            return "en_US";
+        language:{
+            name: Std.cookie.get("filecxx_wui_lang_name"),
+            value:Std.cookie.get("filecxx_wui_lang_value")
         },
+
         parse:function(text)
         {
             var list  = {};
@@ -84,10 +104,28 @@ var filecxx_wui =
         {
             let that = this;
 
-            Std.ajax.get("lang/" + that.name() + ".lang",(content)=>{
+            Std.ajax.get("lang/" + that.language.name + ".lang",(content)=>{
                 that.parse(content);
                 callback();
             });
+        },
+        init:function()
+        {
+            if(this.language.name && this.language.text){
+                return {name:this.language.name,text:this.language.text};
+            }
+            var lang = navigator.language.replace('-','_');
+
+            for(let key in filecxx_wui.languages)
+            {
+                if(key === lang){
+                    this.language.name  = lang;
+                    this.language.value = filecxx_wui.languages[key];
+                    return;
+                }
+            }
+            this.language.name  = "en_US";
+            this.language.value = "English";
         }
     }
 };

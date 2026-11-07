@@ -5,8 +5,6 @@ Std.ui.module("filecxx_tasks",
         level:4,
         width:"auto",
         height:"auto",
-        className:"tasks_main",
-        padding:4
     },
 
     initialize:
@@ -43,23 +41,58 @@ Std.ui.module("filecxx_tasks",
                 }
             };
         },
+        init_filter:function()
+        {
+            this.filter_ = Std.ui("ComboBox",{
+                editable:true,
+                width:"auto",
+                placeHolder:lang("filter")
+            });
+        },
         init_toolbar:function()
         {
             let actions = this.actions;
 
-            this.toolbar_ = Std.ui("ToolBar",{
+            this.toolbar_ = Std.ui("ToolBar",
+            {
                 iconWidth:24,
                 iconHeight:24,
                 items:[
-                    actions.add,
+                    {
+                        ui:"SplitToolButton",
+                        text:lang("add"),
+                        icon:"icons/24/add.svg",
+                        styleType:"textBesideIcon",
+                        dropdown:Std.ui("Menu",{
+                            items:[
+                                {
+                                    text:lang("add"),
+                                    icon:"icons/24/add.svg",
+                                },
+                                {
+                                    text:lang("add_directory"),
+                                    icon:"icons/24/add.svg",
+                                },
+                                {
+                                    text:lang("add_stream"),
+                                    icon:"icons/16/stream.svg",
+                                }
+                            ]
+                        })
+                    },
+
                     actions.open,
                     actions.start,
                     actions.stop,
                     actions.remove,
+
+                    {ui:"sep"},
+
+                    this.filter_
                 ]
-            });
-            this.layout_.append(this.toolbar_);
+            })
         },
+
         init_grid:function()
         {
             let actions = this.actions;
@@ -108,14 +141,46 @@ Std.ui.module("filecxx_tasks",
                     ]
                 }
             });
-            this.layout_.append(this.grid_);
+        },
+        init_tabs:function()
+        {
+            this.tabs_ = Std.ui("TabPanel",
+            {
+                items:[
+                    {
+                        name:"file_transfer",
+                        button:{
+                            text:lang("file_transfer"),
+                            icon:"icons/16/file.svg",
+                            iconWidth: 16,
+                            iconHeight: 16,
+                            styleType:"textBesideIcon",
+                            className:"tasks_tab_button"
+                        },
+                        content:{
+                            layout:{
+                                ui:"VBoxLayout",
+                                items:[
+                                    this.toolbar_,
+                                    this.grid_
+                                ]
+                            }
+                        }
+                    }
+                ]
+            });
+            this.layout_.append(this.tabs_);
         }
     },
-    main:function(that,opts){
+    main:function(that,opts)
+    {
         that.init_layout();
         that.init_actions();
 
+        that.init_filter();
         that.init_toolbar();
+
         that.init_grid();
+        that.init_tabs();
     }
 })

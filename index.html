@@ -21,6 +21,7 @@
     <script src="libs/ui/ui.SplitButton.js"></script>
     <script src="libs/ui/ui.ToolBar.js"></script>
     <script src="libs/ui/ui.Image.js"></script>
+    <script src="libs/ui/ui.Progress.js"></script>
     <script src="libs/ui/ui.Window.js"></script>
     <script src="libs/ui/ui.MessageBox.js"></script>
     <script src="libs/ui/ui.Notify.js"></script>
@@ -36,11 +37,15 @@
     <script src="libs/ui/ui.MenuBar.js"></script>
     <script src="libs/ui/ui.StatusBar.js"></script>
 
+    <script src="libs/mime.js"></script>
+    <script src="libs/functions.js"></script>
     <script src="libs/filecxx_rpc.js"></script>
 
     <script src="config.js"></script>
     <script src="modules/rpc.js"></script>
     <script src="modules/messages.js"></script>
+    <script src="modules/groups/main.js"></script>
+    <script src="modules/catalogs/main.js"></script>
     <script src="modules/tasks/main.js"></script>
     <script src="main.js"></script>
 
@@ -71,9 +76,22 @@
             border-right: 1px solid #eff0f1;
             background: transparent;
         }
+        .StdUI_Progress > ._location{
+            transition: none;
+        }
         .tasks_main
         {
-            border: 1px solid #c8c9ca;
+           
+        }
+        .tasks_main .file_name_
+        {
+            padding-left: 26px;
+            position: relative;
+            overflow: hidden;
+            word-break: keep-all;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            background-repeat: no-repeat;
         }
         .StdUI_TabButton.tasks_tab_button.selected{
             border-top: 2px solid #4aabdb;

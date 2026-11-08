@@ -125,58 +125,6 @@ Std.ui.module("filecxx_webui",
         },
         init_groups:function()
         {
-            this.groups_ = Std.ui("List",
-            {
-                iconHeight:24,
-                iconWidth:24,
-                itemHeight:36,
-                valueType:"list-value",
-                value:"all",
-                items:[
-                    {
-                        icon:"icons/24/all.svg",
-                        text:lang("all"),
-                        value:"all"
-                    },
-                    {
-                        icon:"icons/24/download.svg",
-                        text:lang("transferring"),
-                        value:"transferring"
-                    },
-                    {
-                        icon:"icons/24/stop.svg",
-                        text:lang("stopped"),
-                        value:"stopped"
-                    },
-                    {
-                        icon:"icons/24/success.svg",
-                        text:lang("completed"),
-                        value:"completed"
-                    },
-                    {
-                        icon:"icons/24/seeding.svg",
-                        text:lang("seeding"),
-                        value:"seeding"
-                    },
-                    {
-                        icon:"icons/24/failed.svg",
-                        text:lang("failed"),
-                        value:"failed"
-                    },
-                    {
-                        icon:"icons/24/queuing.svg",
-                        text:lang("queuing"),
-                        value:"queuing"
-                    },
-                    {
-                        icon:"icons/24/delay.svg",
-                        text:lang("download_later"),
-                        value:"download_later"
-                    }
-                ]
-            });
-            this.groups_.select(0);
-
             this.layout_left_.append({ui:"HBoxLayout",
                 items:[
                     {ui:"Label",text:lang("all_groups"),css:{color:"gray"}},
@@ -184,23 +132,10 @@ Std.ui.module("filecxx_webui",
                 ]
             });
             this.layout_left_.append({ui:"sep",className:"left_sep_"});
-            this.layout_left_.append(this.groups_);
+            this.layout_left_.append(filecxx_wui.groups);
         },
         init_catalogs:function()
         {
-            this.catalogs_ = Std.ui("List",{
-                iconHeight:24,
-                iconWidth:24,
-                itemHeight:28,
-                items:[
-                    {
-                        icon:"icons/24/all.svg",
-                        text:lang("all")
-                    },
-                ]
-            })
-            this.catalogs_.select(0);
-
             this.layout_left_.append({ui:"HBoxLayout",
                 items:[
                     {ui:"Label",text:lang("catalogs"),css:{color:"gray"}},
@@ -209,7 +144,7 @@ Std.ui.module("filecxx_webui",
                 ]
             });
             this.layout_left_.append({ui:"sep",className:"left_sep_"});
-            this.layout_left_.append(this.catalogs_);
+            this.layout_left_.append(filecxx_wui.catalogs);
         },
         init_statusbar:function()
         {
@@ -309,9 +244,9 @@ Std.main.hold(function(holder,handler)
 */
 Std.main(function()
 {
-    filecxx_wui.tasks = Std.ui("filecxx_tasks",{
-
-    });
+    filecxx_wui.groups   = Std.ui("filecxx_groups",{});
+    filecxx_wui.catalogs = Std.ui("filecxx_catalogs",{});
+    filecxx_wui.tasks    = Std.ui("filecxx_tasks",{});
 
     let main_widget = Std.ui("filecxx_webui",{
         renderTo:"body",

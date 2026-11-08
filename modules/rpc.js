@@ -25,10 +25,13 @@ filecxx_wui.rpc =
         }
         filecxx_rpc.on_message = function(message)
         {
+            //console.log(message)
             let msg_type = message["@"];
-            filecxx_wui.messages[msg_type](message);
-            
-            console.log(message)
+            delete message["@"];
+
+            if(msg_type in filecxx_wui.messages){
+                filecxx_wui.messages[msg_type](message);
+            }
         }
         filecxx_rpc.on_error = function(text)
         {

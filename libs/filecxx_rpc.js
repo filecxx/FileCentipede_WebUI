@@ -7,6 +7,9 @@
 
 var filecxx_rpc =
 {
+    version: 1.0,
+
+    ///-----------------
     config:{
         host:"",
         port:10111,
@@ -120,5 +123,78 @@ var filecxx_rpc =
         if(that.websocket_){
             that.websocket_.close();
         }
-    }
+    },
+
+
+    task_modes:
+    {
+        Task_Mode_Encrypted_URI:   1 << 0,
+        Task_Mode_Custom_Protocol: 1 << 1,
+        Task_Mode_Upload:          1 << 2,
+        Task_Mode_Has_Meta:        1 << 3,
+        Task_Mode_Temp:            1 << 4,
+        Task_Mode_Internal:        1 << 5,
+        Task_Mode_Upgrade:         1 << 6,
+        Task_Mode_Filesystem:      1 << 7,
+        Task_Mode_Directory:       1 << 8
+    },
+    task_states:
+    {
+        State_Invalid               : 0,
+        State_Later                 : 1,
+        State_Queuing               : 2,
+        State_Restoring             : 3,
+        State_Starting              : 4,
+        State_Resuming              : 5,
+        State_Checking              : 6,
+        State_Downloading_Metadata  : 7,
+        State_Downloading           : 8,
+        State_Uploading             : 9,
+        State_Merging               : 10,
+        State_Stopping              : 11,
+        State_Removing              : 12,
+        State_Restarting            : 13,
+        State_Seeding               : 14,
+        State_Stopped               : 15,
+        State_Completed             : 16,
+        State_Error                 : 17,
+        State_Completing            : 18,
+        State_Waiting				: 19,
+
+        State_Size                  : 20
+    },
+    task_substates:
+    {
+        Substate_None                : 0,
+        Substate_Confirming          : 1,
+        Substate_Deleting            : 2,
+        Substate_Deleting_File       : 3,
+        Substate_Moving              : 4,
+        Substate_Renaming            : 5,
+        Substate_Renaming_Directory  : 6,
+        Substate_Redownloading       : 7
+    },
+
+    task_state_texts: [
+        "invalid",
+        "download_later",
+        "queuing",
+        "restoring",
+        "starting",
+        "resuming",
+        "checking",
+        "downloading_metadata",
+        "downloading",
+        "uploading",
+        "merging",
+        "stopping",
+        "removing",
+        "restarting",
+        "seeding",
+        "stopped",
+        "completed",
+        "error",
+        "completing",
+        "waiting"
+    ]
 };

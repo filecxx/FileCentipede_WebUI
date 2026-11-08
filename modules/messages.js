@@ -18,37 +18,35 @@ filecxx_wui.messages =
     },
 
 
-    "configs":function(msg)
+    configs:function(msg)
     {
-
+        filecxx_wui.data.configs = msg;
+        //console.log(msg)
     },
-    "proxies":function(msg)
+    proxies:function(msg)
     {
-
+        filecxx_wui.data.proxies = msg.items;
     },
-    "http_mirrors":function(msg)
+    http_mirrors:function(msg)
     {
-
+        filecxx_wui.data.http_mirrors = msg.items;
     },
-    "site_rules":function(msg)
+    site_rules:function(msg)
     {
-
+        filecxx_wui.data.site_rules = msg.items;
     },
-    "subscribes":function(msg)
+    subscribes:function(msg)
     {
-
+        //console.log(msg)
     },
-    "catalogs":function(msg)
+    catalogs:function(msg)
     {
-
+        filecxx_wui.data.catalogs = msg.items;
+        filecxx_wui.catalogs.load(msg.items)
     },
-    "paths":function(msg)
+    paths:function(msg)
     {
-
-    },
-    "tasks":function(msg)
-    {
-
+        filecxx_wui.data.paths = msg.items;
     },
     "status":function(msg)
     {
@@ -231,9 +229,9 @@ filecxx_wui.messages =
     {
 
     },
-    "task_status":function(msg)
+    task_status:function(msg)
     {
-
+        filecxx_wui.tasks.task_status(msg);
     },
     "task_progress":function(msg)
     {
@@ -411,10 +409,6 @@ filecxx_wui.messages =
 
     },
 
-    "echo":function(msg)
-    {
-
-    },
     "ports":function(msg)
     {
 
@@ -438,11 +432,30 @@ filecxx_wui.messages =
     //------------------
     version:function(msg)
     {
-
+        if(msg.version < 2.91){
+            Std.ui("MessageBox").error("Backend version is too low: " + msg.version);
+            return;
+        }
+        filecxx_wui.version_backend = msg.version;
+        filecxx_rpc.send("running_state");
     },
     running_state:function(msg)
     {
-        console.log(msg)
+        if(msg.engines !== true){
+            return;
+        }
+        filecxx_wui.tasks.clear();
+
+
+        filecxx_rpc.send("configs");
+        filecxx_rpc.send("proxies");
+        filecxx_rpc.send("http_mirrors");
+        filecxx_rpc.send("site_rules");
+        filecxx_rpc.send("catalogs");
+        filecxx_rpc.send("paths");
+        filecxx_rpc.send("subscribes");
+        filecxx_rpc.send("tasks");
+        //console.log(msg)
     },
 
 
@@ -450,6 +463,5 @@ filecxx_wui.messages =
     boot:function()
     {
         filecxx_rpc.send("version");
-        filecxx_rpc.send("running_state");
     }
 }

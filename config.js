@@ -1,25 +1,9 @@
 var filecxx_wui =
 {
     version: 1.0,
-    languages: {
-        "de_DE":"Deutsch",
-        "en_US":"English",
-        "eo_001":"esperanto",
-        "es_ES":"Español",
-        "fr_FR":"Français",
-        "id_ID":"Indonesia",
-        "it_IT":"Italiano",
-        "ja_JP":"日本語",
-        "ko_KR":"한국어",
-        "nl_NL":"Nederlands",
-        "pl_PL":"Polski",
-        "pt_BR":"português",
-        "ru_RU":"русский",
-        "tr_TR":"Türkçe",
-        "vi_VN":"Tiếng Việt",
-        "zh_CN":"简体中文",
-        "zh_TW":"繁體中文",
-    },
+    version_backend: 0,
+    data:{},
+
 
     lang:
     {
@@ -27,7 +11,25 @@ var filecxx_wui =
             name: Std.cookie.get("filecxx_wui_lang_name"),
             value:Std.cookie.get("filecxx_wui_lang_value")
         },
-
+        languages: {
+            "de_DE":"Deutsch",
+            "en_US":"English",
+            "eo_001":"esperanto",
+            "es_ES":"Español",
+            "fr_FR":"Français",
+            "id_ID":"Indonesia",
+            "it_IT":"Italiano",
+            "ja_JP":"日本語",
+            "ko_KR":"한국어",
+            "nl_NL":"Nederlands",
+            "pl_PL":"Polski",
+            "pt_BR":"português",
+            "ru_RU":"русский",
+            "tr_TR":"Türkçe",
+            "vi_VN":"Tiếng Việt",
+            "zh_CN":"简体中文",
+            "zh_TW":"繁體中文",
+        },
         parse:function(text)
         {
             var list  = {};
@@ -116,11 +118,11 @@ var filecxx_wui =
             }
             var lang = navigator.language.replace('-','_');
 
-            for(let key in filecxx_wui.languages)
+            for(let key in filecxx_wui.lang.languages)
             {
                 if(key === lang){
                     this.language.name  = lang;
-                    this.language.value = filecxx_wui.languages[key];
+                    this.language.value = filecxx_wui.lang.languages[key];
                     return;
                 }
             }

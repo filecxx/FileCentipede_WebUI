@@ -60,8 +60,11 @@ Std.ui.module("filecxx_groups",
         {
             let that = this;
 
-            that.on("itemClick",val=>{
-                that.selected_states_array = that.selected_states(val.value());
+            that.plugin("contextMenu",{
+                items:[]
+            });
+            that.on("itemSelected",index=>{
+                that.selected_states_array = that.selected_states(that.items(index).value());
                 filecxx_wui.tasks.filter("catalog",filecxx_wui.catalogs.selected_catalogs,that.selected_states_array);
             })
         }

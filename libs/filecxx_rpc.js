@@ -16,7 +16,6 @@ var filecxx_rpc =
         ssl:false,
         username:"",
         password:"",
-        reconnect_timeout:-1 // -1 or >=0
     },
     on_open:null,
     on_connect:null,
@@ -39,7 +38,7 @@ var filecxx_rpc =
     //-----------------
     send:function(message_type,json)
     {
-        if(this.websocket_)
+        if(this.websocket_ && this.established_)
         {
             if(!json){
                 json = {};
@@ -47,13 +46,6 @@ var filecxx_rpc =
             json["@"] = message_type;
             this.websocket_.send(JSON.stringify(json));
         }
-    },
-    send_auth:function()
-    {
-        this.send("wsc",{
-            "username":this.config.username,
-            "password":this.config.password,
-        });
     },
     connect:function()
     {
@@ -68,8 +60,9 @@ var filecxx_rpc =
             clearTimeout(that.timer_);
             that.timer_  = null;
             that.on_open && that.on_open();
-            that.send_auth(); //step2
 
+            //step2
+            that.websocket_.send(JSON.stringify({"@":"wsc", "username":that.config.username, "password":that.config.password}));
             that.websocket_.onmessage = (event)=>
             {
                 if(event.data instanceof ArrayBuffer){
@@ -105,16 +98,11 @@ var filecxx_rpc =
 
             clearTimeout(that.timer_);
             that.timer_  = null;
-
-            if(that.config.reconnect_timeout >= 0)
-            {
-                that.timer_ = setTimeout(function(){
-                    that.connect();
-                },that.config.reconnect_timeout);
-            }
             that.on_close && that.on_close();
         };
-        that.timer_ = setTimeout(close,1500);
+        that.timer_ = setTimeout(function(){
+            that.close();
+        },1500);
     },
     close:function()
     {
@@ -125,7 +113,7 @@ var filecxx_rpc =
         }
     },
 
-
+    ///-----------------------------
     task_modes:
     {
         Task_Mode_Encrypted_URI:   1 << 0,

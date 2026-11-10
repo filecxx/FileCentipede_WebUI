@@ -20,24 +20,32 @@ Std.ui.module("filecxx_webui",
             }).move("central").move("central").updateLayout();
         }
     },
+    private:{
+        status_timer: -1,
+    },
     initialize:
     {
         init_layout:function()
         {
-            this.layout_left_ = Std.ui("VBoxLayout",{
-                level:3,
-                width:250
+            this.layout_left_ = Std.ui("VBoxLayout",{});
+            this.panel_left_ = Std.ui("widget",{
+                level:4,
+                width:220,
+                fixedWidth:220,
+                layout: this.layout_left_
             });
+
             this.layout_right_ = Std.ui("VBoxLayout",{
                 level:4
             });
             this.layout_body_ = Std.ui("HBoxLayout",{
                 spacing:10,
                 items:[
-                    this.layout_left_,
+                    this.panel_left_,
                     this.layout_right_
                 ]
             });
+
             this.layout_ = Std.ui("VBoxLayout",
             {
                 spacing: 12,
@@ -50,8 +58,10 @@ Std.ui.module("filecxx_webui",
 
         init_menubar:function()
         {
-            this.menubar_ = Std.ui("MenuBar",{
+            let that = this;
 
+            that.menubar_ = Std.ui("MenuBar",
+            {
                 items:[
                     {
                         text:lang("file"),
@@ -61,18 +71,9 @@ Std.ui.module("filecxx_webui",
                                 icon:"icons/16/add_file.svg"
                             },
                             {ui:"sep"},
-                            {
-                                text:lang("add"),
-                                icon:"icons/24/add.svg"
-                            },
-                            {
-                                text:lang("add_directory"),
-                                icon:"icons/24/add.svg"
-                            },
-                            {
-                                text:lang("add_stream"),
-                                icon:"icons/16/stream.svg"
-                            },
+                            filecxx_wui.module_action("add","icons/24/add.svg","modules/tasks/add.js","filecxx_task_add"),
+                            filecxx_wui.module_action("add_directory","icons/24/add.svg","modules/tasks/add_directory.js","filecxx_task_add_directory"),
+                            filecxx_wui.module_action("add_stream","icons/24/stream.svg","modules/tasks/add_stream.js","filecxx_task_add_stream"),
                             {ui:"sep"},
                             {
                                 text:lang("exit"),
@@ -87,18 +88,53 @@ Std.ui.module("filecxx_webui",
                         text:lang("view"),
                         items:[
                             {
-                                text:lang("TODO"),
-                                icon:"icons/16/add_file.svg"
+                                text:lang("statusbar"),
+                                checkable:true,
+                                checked:true,
+                                on:{
+                                    checked:function(val){
+                                        that.statusbar_widget_.visible(val)
+                                        that.layout_.update()
+                                    }
+                                }
                             },
+                            {
+                                text:lang("navigation"),
+                                checkable:true,
+                                checked:true,
+                                on:{
+                                    checked:function(val){
+                                        that.panel_left_.visible(val)
+                                        that.layout_.update()
+                                    }
+                                }
+                            },
+                            {
+                                text:lang("catalogs"),
+                                checkable:true,
+                                checked:true,
+                                on:{
+                                    checked:function(val){
+                                        filecxx_wui.catalogs.visible(val)
+                                        that.layout_left_.update()
+                                    }
+                                }
+                            },
+                            {ui:"sep"},
+                            filecxx_wui.module_action("statistics","icons/16/statistics.svg","modules/view/statistics.js","filecxx_statistics"),
                         ]
                     },
                     {
                         text:lang("settings"),
                         items:[
-                            {
-                                text:lang("TODO"),
-                                icon:"icons/16/add_file.svg"
-                            },
+                            filecxx_wui.module_action("BT " + lang("tracker"),"icons/16/tracker.svg" ,"modules/settings/bt_trackers.js","filecxx_bt_trackers"),
+                            filecxx_wui.module_action("filter","icons/16/filter.svg","modules/settings/filters.js","filecxx_filters"),
+                            filecxx_wui.module_action("proxy","icons/16/proxy.svg","modules/settings/proxies.js","filecxx_proxies"),
+                            filecxx_wui.module_action("accel_servers","icons/16/rocket.svg","modules/settings/accel_servers.js","filecxx_accel_servers"),
+                            filecxx_wui.module_action("site_rules","icons/16/favorites.svg","modules/settings/site_rules.js","filecxx_site_rules"),
+
+                            {ui:"sep"},
+                            filecxx_wui.module_action("settings","icons/16/setting.svg","modules/settings/main.js","filecxx_settings"),
                         ]
                     },
                     {
@@ -158,7 +194,7 @@ Std.ui.module("filecxx_webui",
                 width:120,
                 height:28,
                 icon:"icons/16/download.svg",
-                text:" 0.00 B/s",
+                text:"0.00 B/s",
                 css:"color:#00477d"
             });
             this.status_upload_speed_limit_ = Std.ui("ToolButton",{
@@ -168,9 +204,10 @@ Std.ui.module("filecxx_webui",
                 iconWidth:16,
                 iconHeight:16,
                 icon:"icons/16/upload.svg",
-                text:" 0.00 B/s",
+                text:"0.00 B/s",
                 css:"color:#4b1e1e"
             })
+
             this.statusbar_ = Std.ui("StatusBar",{
                 height:32
             })
@@ -180,13 +217,20 @@ Std.ui.module("filecxx_webui",
                 items:[
                     this.statusbar_,
 
+                    {ui:"stretch",level:3},
+
                     this.status_dht_,
                     {ui:"sep",level:1,className:"statusbar_sep_"},
                     this.status_download_speed_limit_,
                     this.status_upload_speed_limit_,
                 ]
             })
-            this.layout_.append(this.statusbar_layout_);
+            this.statusbar_widget_ = this.statusbar_ = Std.ui("widget",{
+                height:32,
+                level:2,
+                layout:this.statusbar_layout_
+            })
+            this.layout_.append(this.statusbar_widget_);
         },
         init_tasks_panel:function(){
             this.layout_right_.append(filecxx_wui.tasks)
@@ -212,6 +256,28 @@ Std.ui.module("filecxx_webui",
                 });
                 filecxx_wui.messages.boot();
             });
+        },
+        init_timer:function()
+        {
+            let that = this;
+
+            that.status_timer_ = setInterval(function()
+            {
+                if(filecxx_rpc.is_established()){
+                    filecxx_rpc.send("status")
+                }
+            },500);
+        }
+    },
+    public:
+    {
+        on_status:function(values)
+        {
+            this.status_dht_.text("DHT Nodes: " + values.torrent_DHT_peers);
+            this.status_download_speed_limit_.text(bytes_to_str(values.global_speed_download) + "/s")
+            this.status_upload_speed_limit_.text(bytes_to_str(values.global_speed_upload) + "/s")
+            this.statusbar_layout_.update()
+            //console.log(values)
         }
     },
     main:function(that,opts)
@@ -225,6 +291,7 @@ Std.ui.module("filecxx_webui",
         that.init_statusbar();
 
         that.init_rpc();
+        that.init_timer();
     }
 });
 
@@ -247,16 +314,14 @@ Std.main(function()
     filecxx_wui.groups   = Std.ui("filecxx_groups",{});
     filecxx_wui.catalogs = Std.ui("filecxx_catalogs",{});
     filecxx_wui.tasks    = Std.ui("filecxx_tasks",{});
-
-    let main_widget = Std.ui("filecxx_webui",{
+    filecxx_wui.main     = Std.ui("filecxx_webui",{
         renderTo:"body",
         width:Std.dom(window).width(),
         height:Std.dom(window).height(),
     });
     Std.dom(window).on("resize",function(){
-        main_widget.width(this.width());
-        main_widget.height(this.height());
-
+        filecxx_wui.main.width(this.width());
+        filecxx_wui.main.height(this.height());
     });
     Std.dom("title").text(filecxx_wui.lang.format('${software_name_} WebUI ' + filecxx_wui.version.toFixed(2)))
 });

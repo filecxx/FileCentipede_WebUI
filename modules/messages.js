@@ -48,9 +48,9 @@ filecxx_wui.messages =
     {
         filecxx_wui.data.paths = msg.items;
     },
-    "status":function(msg)
+    status:function(msg)
     {
-
+        filecxx_wui.main.on_status(msg);
     },
     "statistics":function(msg)
     {

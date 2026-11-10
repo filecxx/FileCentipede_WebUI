@@ -19,8 +19,18 @@ Std.ui.module("filecxx_catalogs",
         {
             let that = this;
 
-            that.on("itemClick",val=> {
-                that.selected_catalogs = val.value();
+            that.plugin("contextMenu",{
+                items:[
+                    {
+                        text:"TODO"
+                    },
+                    {
+                        text:"TODO"
+                    }
+                ]
+            });
+            that.on("itemSelected",index=> {
+                that.selected_catalogs = that.items(index).value();
                 filecxx_wui.tasks.filter("catalog",that.selected_catalogs,filecxx_wui.groups.selected_states_array);
             });
         }

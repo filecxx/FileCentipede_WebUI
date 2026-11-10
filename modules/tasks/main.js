@@ -2,7 +2,7 @@ Std.ui.module("filecxx_tasks",
 {
     parent:"widget",
     option:{
-        level:4,
+        level:5,
         width:"auto",
         height:"auto",
         className: "tasks_main",
@@ -18,27 +18,81 @@ Std.ui.module("filecxx_tasks",
         },
         init_actions:function()
         {
+            let that = this;
+
             this.actions = {
-                add:{
-                    text:lang("add"),
-                    icon:"icons/24/add.svg"
-                },
                 open:{
                     text:lang("open"),
                     icon:"icons/24/add_file.svg"
                 },
                 start:{
                     text:lang("start"),
-                    icon:"icons/24/start.svg"
+                    icon:"icons/24/start.svg",
+                    click:function()
+                    {
+                        that.selected_tasks(function(row,values){
+                            filecxx_rpc.send("task_resume",{id:values.id,type:values.type})
+                        });
+                    }
                 },
                 stop:{
                     text:lang("stop"),
-                    icon:"icons/24/stop.svg"
+                    icon:"icons/24/stop.svg",
+                    click:function()
+                    {
+                        that.selected_tasks(function(row,values){
+                            filecxx_rpc.send("task_pause",{id:values.id,type:values.type})
+                        });
+                    }
                 },
+                rename:{
+                    text:lang("rename") + " <span style='margin-left: 24px'>F2</span>",
+                    icon:"icons/16/rename.svg",
+                    click:function()
+                    {
+                        that.selected_tasks(function(row,values){
+                            filecxx_wui.run_module("modules/tasks/rename.js","filecxx_task_rename",{
+                                file_name:values.file_name,
+                                callback:function(new_name){
+
+                                }
+                            })
+                            //filecxx_rpc.send("task_remove",{id:values.id,type:values.type})
+                        });
+                    }
+                },
+                move_to:{
+                    text:lang("move_to"),
+                    icon:"icons/16/move.svg",
+                    enable:false
+                },
+
+                open_file:{
+                    text:lang("open_file"),
+                    icon:"icons/16/run.svg",
+                    enable:false
+                },
+                open_directory:{
+                    text:lang("open_directory"),
+                    icon:"icons/16/directory.svg",
+                    enable:false
+                },
+
                 remove:{
                     text:lang("delete"),
-                    icon:"icons/24/delete.svg"
-                }
+                    icon:"icons/24/delete.svg",
+                    click:function(){
+
+                    }
+                },
+                edit:{
+                    text:lang("edit"),
+                    icon:"icons/16/edit.svg"
+                },
+                redownload:{
+                    text:lang("redownload"),
+                    icon:"icons/16/download.svg"
+                },
             };
         },
         init_filter:function()
@@ -71,26 +125,26 @@ Std.ui.module("filecxx_tasks",
                         text:lang("add"),
                         icon:"icons/24/add.svg",
                         styleType:"textBesideIcon",
-                        dropdown:Std.ui("Menu",{
+                        dropdown:Std.ui("Menu",
+                        {
                             items:[
-                                {
-                                    text:lang("add"),
-                                    icon:"icons/24/add.svg",
-                                },
-                                {
-                                    text:lang("add_directory"),
-                                    icon:"icons/24/add.svg",
-                                },
-                                {
-                                    text:lang("add_stream"),
-                                    icon:"icons/16/stream.svg",
-                                }
+                                filecxx_wui.module_action("add","icons/24/add.svg","modules/tasks/add.js","filecxx_task_add"),
+                                filecxx_wui.module_action("add_directory","icons/24/add.svg","modules/tasks/add_directory.js","filecxx_task_add_directory"),
+                                filecxx_wui.module_action("add_stream","icons/24/stream.svg","modules/tasks/add_stream.js","filecxx_task_add_stream"),
                             ]
-                        })
+                        }),
+                        on:{
+                            click:function(){
+                                Std.loader.js("modules/tasks/add.js",function(){
+                                    Std.ui("filecxx_task_add",{})
+                                });
+                            }
+                        }
                     },
 
                     actions.open,
                     actions.start,
+                    {ui:"sep"},
                     actions.stop,
                     actions.remove,
 
@@ -103,9 +157,10 @@ Std.ui.module("filecxx_tasks",
 
         init_grid:function()
         {
+            let that    = this;
             let actions = this.actions;
 
-            this.grid_ = Std.ui("Grid",{
+            that.grid_ = Std.ui("Grid",{
                 rowNumbers:false,
                 rowHeight:32,
                 rowResizable:false,
@@ -150,11 +205,12 @@ Std.ui.module("filecxx_tasks",
                             }else if(suffix in filecxx_mime_filenames){
                                 icon = filecxx_mime_filenames[suffix];
                             }
-                            if(cell.row.data.color){
-                                elem.css("color",cell.row.data.color)
-                            }
                             elem.css("background-image",`url("icons/mimetypes/24/${icon}.png")`)
                             cell.html(elem);
+
+                            if(cell.row.data.color){
+                                cell.row.color(cell.row.data.color)
+                            }
                         }
                     },
                     file_size:
@@ -176,9 +232,6 @@ Std.ui.module("filecxx_tasks",
                                 cell.html(lang(filecxx_rpc.task_state_texts[data]));
                             }else if(isString(data)){
                                 cell.html(data);
-                            }
-                            if(cell.row.data.color){
-                                cell.css("color",cell.row.data.color)
                             }
                         }
                     },
@@ -230,14 +283,49 @@ Std.ui.module("filecxx_tasks",
                         }
                     },
                 },
-                rowContextMenu:{
+                rowContextMenu:
+                {
                     items:[
                         actions.start,
                         actions.stop,
+                        {ui:"sep"},
+                        actions.rename,
+                        actions.move_to,
                         actions.remove,
+                        {ui:"sep"},
+                        actions.open_file,
+                        actions.open_directory,
+                        {ui:"sep"},
+                        actions.redownload,
+                        actions.edit,
+                        {ui:"sep"},
+                        {
+                            width:210,
+                            text:lang("copy"),
+                            icon:"icons/16/copy.svg",
+                            items:[
+                                {
+                                    text:"....."
+                                }
+                            ]
+                        },
+                        {
+                            text:lang("catalogs"),
+                            icon:"icons/16/directory.svg",
+                            items:[
+                                {
+                                    text:"....."
+                                }
+                            ]
+                        }
                     ]
                 },
                 on:{
+                    columnSortStart:function(column,type)
+                    {
+                        that.sorted_column_      = column.name();
+                        that.sorted_column_type_ = type;
+                    },
                     rowEvent:function(type)
                     {
                         if(type === "dblclick"){
@@ -306,10 +394,39 @@ Std.ui.module("filecxx_tasks",
                 ]
             });
             this.layout_.append(this.tabs_);
-        }
+        },
+        init_shortcuts:function()
+        {
+            let that = this;
+
+            Std.dom(window).on("keydown",function(e)
+            {
+                switch(e.key)
+                {
+                case "F2":
+                    that.actions.rename.click();
+                    e.preventDefault();
+                    break;
+                case "Delete":
+                    that.actions.remove.click();
+                    break;
+                }
+            });
+
+        },
+    },
+    private:{
+        interval_1s_:-1
     },
     protected:
     {
+        /*
+         * is folder
+        */
+        is_folder:function(values)
+        {
+            return (values.mode & filecxx_rpc.task_modes.Task_Mode_Directory) !== 0 || Boolean(values.files && values.files > 0);
+        },
         /*
          * on task
         */
@@ -348,9 +465,44 @@ Std.ui.module("filecxx_tasks",
                 return "";
             }
         },
+
+
+        /*
+         * on interval 1s
+        */
+        on_interval_1s:function()
+        {
+            let that = this;
+
+            that.tasks_active.forEach((task)=>{
+                filecxx_rpc.send("task_status",{id:task.id, type:task.type, extended:true})
+            });
+        }
     },
     public:
     {
+        /*
+         * selected tasks
+        */
+        selected_tasks:function(handler)
+        {
+            let rows = this.grid_.selectedRows(true);
+
+            for(let i=0;i<rows.length;++i){
+                handler(rows[i],rows[i].data_value.values);
+            }
+        },
+        /*
+         * sort tasks
+        */
+        sort_tasks:function()
+        {
+            let that = this;
+
+            if(that.sorted_column_){
+                that.grid_.sortColumn(that.sorted_column_,that.sorted_column_type_);
+            }
+        },
         /*
          * filter
         */
@@ -366,6 +518,7 @@ Std.ui.module("filecxx_tasks",
             hidden_rows.clear();
 
             if((!states && (text === null || text.length === 0)) || grid.rowCount() === 0){
+                that.sort_tasks();
                 return;
             }
             if(text){
@@ -397,6 +550,29 @@ Std.ui.module("filecxx_tasks",
                     }
                 }
             }
+            that.sort_tasks();
+        },
+
+
+        /*
+         * remove task
+        */
+        rename_task:function(id,type,new_name)
+        {
+            filecxx_rpc.send("task_rename",{id:id, type:type, idx:-1, name: new_name});
+        },
+        /*
+         * remove task
+        */
+        remove_task:function(id,type,delete_file)
+        {
+            let that = this;
+
+            that.tasks_active.delete(id);
+            that.tasks_all.delete(id);
+            that.tasks_confirming.delete(id);
+
+            filecxx_rpc.send("task_remove",{id:id, type:type, delete_file: delete_file});
         },
         /*
          * update task
@@ -404,12 +580,29 @@ Std.ui.module("filecxx_tasks",
         update_task:function(values)
         {
             let that  = this;
-            let tasks = that.tasks;
+            let tasks = that.tasks_all;
+            let grid  = that.grid_;
 
             if(!tasks.has(values.id)){
                 return false;
             }
-            //todo:
+            let task = tasks.get(values.id);
+            Std.extend(task,values);
+
+            let row = grid.row(values.id + "");
+
+            if(row)
+            {
+                let owner = grid.row(values.id + "",true);
+
+                row.data_value.color  = that.row_color(row.data_value.values.state);
+                row.data_value.folder = that.is_folder(values);
+
+                if(owner){
+                    owner.update();
+                }
+            }
+            return true;
         },
         /*
          * add task
@@ -420,21 +613,29 @@ Std.ui.module("filecxx_tasks",
             let id     = values.id;
             let type   = values.type;
             let state  = values.state;
-            let folder = (values.mode & filecxx_rpc.task_modes.Task_Mode_Directory) !== 0 || (values.files && values.files > 0);
             let grid   = that.grid_;
+            let index  = 0;
 
-            grid.appendRow({
+            if(that.sorted_column_){
+                index = grid.boundSearch(values[that.sorted_column_], that.sorted_column_,that.sorted_column_type_);
+            }
+            grid.insertRow({
                 data_value: {
                     id:id,
-                    folder:folder,
+                    folder:that.is_folder(values),
                     values:values
                 },
+                name: id + "",
                 color: that.row_color(state),
                 cells: values
-            });
+            },index);
+
+            that.tasks_all.set(id,values);
+
             if(values.state < filecxx_rpc.task_states.State_Completed)
             {
                 that.tasks_active.set(id,{
+                    id:id,
                     type:type,
                     state:state,
                     confirmed:false,
@@ -451,6 +652,7 @@ Std.ui.module("filecxx_tasks",
             if(!this.update_task(values)){
                 this.add_task(values);
             }
+
             setTimeout(function(){
                 //this.grid_.sortColumn()
             },1000);
@@ -460,14 +662,24 @@ Std.ui.module("filecxx_tasks",
         */
         clear:function()
         {
-            this.grid_.clearRows();
+            let that = this;
+
+            that.grid_.clearRows();
+            that.tasks_all.clear();
+            that.tasks_active.clear();
+            that.tasks_confirming.clear();
+            that.hidden_rows.clear();
         }
     },
     main:function(that,opts)
     {
-        that.tasks        = new Map;
-        that.tasks_active = new Map;
+        that.tasks_all        = new Map;
+        that.tasks_active     = new Map;
+        that.tasks_confirming = new Map;
         that.hidden_rows  = [];
+        that.interval_1s_ = setInterval(function(){
+            that.on_interval_1s();
+        },1000);
 
         that.init_layout();
         that.init_actions();
@@ -478,5 +690,6 @@ Std.ui.module("filecxx_tasks",
         that.init_grid();
         that.init_detailbar();
         that.init_tabs();
+        that.init_shortcuts();
     }
 })

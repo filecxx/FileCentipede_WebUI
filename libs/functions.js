@@ -24,7 +24,7 @@ function bytes_to_str(bytes)
             result /= 1024;
         }
     }
-    return parseFloat(result.toFixed(2)) + units[i];
+    return parseFloat(result.toFixed(2)) + " " + units[i];
 }
 
 function format_ns_time(nanoseconds)

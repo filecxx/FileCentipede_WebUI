@@ -9,11 +9,13 @@ filecxx_wui.rpc =
 
         filecxx_rpc.on_connect = function()
         {
-            callback(filecxx_rpc.config);
             that.connecting_window_.close();
+            callback(filecxx_rpc.config);
         }
         filecxx_rpc.on_close = function()
         {
+            filecxx_wui.tasks.clear();
+
             setTimeout(function()
             {
                 if(that.connecting_window_.visible()){
@@ -38,11 +40,11 @@ filecxx_wui.rpc =
             that.connecting_window_.close();
 
             Std.ui("MessageBox").error({
-                text:text,
+                text:lang(text),
                 closable:false,
                 on:{
                     ok:function(){
-                        that.show_connector();
+                        that.show_connector(callback);
                     }
                 }
             });

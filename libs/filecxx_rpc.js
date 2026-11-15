@@ -13,7 +13,7 @@ var filecxx_rpc =
     config:{
         host:"",
         port:10111,
-        ssl:false,
+        //ssl:false,
         username:"",
         password:"",
     },
@@ -50,7 +50,8 @@ var filecxx_rpc =
     connect:function()
     {
         let that     = this;
-        let protocol = that.config.ssl ? "wss" : "ws";
+        //let protocol = that.config.ssl ? "wss" : "ws";
+        let protocol = "ws";
         let url      =  protocol + '://' + that.config.host + ":" + that.config.port + "/wsc";
 
         that.websocket_ = new WebSocket(url);
@@ -114,6 +115,17 @@ var filecxx_rpc =
     },
 
     ///-----------------------------
+    task_types :
+    {
+        Task_HTTP    : 0,
+        Task_FTP     : 1,
+        Task_Torrent : 2,
+        Task_Ed2k    : 3,
+        Task_Stream  : 4,
+        Task_SSH     : 5,
+
+        Task_Types_Size : 6
+    },
     task_modes:
     {
         Task_Mode_Encrypted_URI:   1 << 0,
@@ -163,6 +175,14 @@ var filecxx_rpc =
         Substate_Redownloading       : 7
     },
 
+    task_type_texts: [
+        "http",
+        "ftp",
+        "torrent",
+        "ed2k",
+        "stream",
+        "ssh"
+    ],
     task_state_texts: [
         "invalid",
         "download_later",

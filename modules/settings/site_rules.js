@@ -4,6 +4,7 @@ Std.ui.module("filecxx_site_rules",
     option:{
         width:620,
         height:310,
+        modal:true,
         title:lang("site_rules"),
         titleIcon:"icons/16/favorites.svg",
     },

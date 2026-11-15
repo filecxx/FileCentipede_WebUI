@@ -2,8 +2,9 @@ Std.ui.module("filecxx_settings",
 {
     parent:"Window",
     option:{
-        width:620,
-        height:310,
+        width:880,
+        height:600,
+        modal:true,
         title:lang("settings"),
         titleIcon:"icons/16/setting.svg",
     },

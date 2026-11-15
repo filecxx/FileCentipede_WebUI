@@ -1,0 +1,6 @@
+/**
+ Std UI Kit Library
+ http://ui.stdjs.com
+ module: PropertyGrid
+ */
+Std.ui.module("PropertyGrid",{b:"Grid",e:{rowHeight:36,rowNumbers:!1,rowResizable:!0,cellEditable:!0,columnResizable:!0,columnSortable:!0,columnDroppable:!1,selectionMode:"none",hoverMode:"cell",valueType:"map",cellEditMode:"click press",columns:[{name:"key",width:160,editable:!1,text:Std.ui.wizard.locale("key")},{name:"value",width:200,cellModel:"value",text:Std.ui.wizard.locale("value")}]},n:{initPropertyModel:function(){this.cellModel("value",{type:"ui",model:function(e,t){var i=Std.ui.schema(),l={value:t},t=(i=Std.ui.schema.widgetType(i,t)).indexOf("[");if(-1!==t){var a,n=Std.ui.wizard.extractAttrs(i,t),i=i.substring(0,t);for(a in n)l[a]=n[a]}return Std.ui(i,l)},create:function(e){e.widget.focus().on("change",function(){e.updateData(this.value())})}})}},j:{value:function(e){var i,t,l=this;if(void 0===e)return i={},l._container.items(function(e,t){i[t.data.name]=t.data.cells[1]}),i;if(!isPlainObject(e))return l;for(t in l.clearRows(),e){var a=e[t];l.appendRow({name:t,cells:[Std.ui.wizard.locale(t),a]})}return l}},k:function(e,t){t.value&&e.value(t.value),e.initPropertyModel()}});

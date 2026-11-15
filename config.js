@@ -3,6 +3,7 @@ var filecxx_wui =
     version: 1.0,
     version_backend: 0,
     data:{},
+    global_status:null,
 
     module_action(text,icon,path,entry,opts)
     {
@@ -130,6 +131,11 @@ filecxx_wui.lang =
     },
     init:function()
     {
+        Std.ui.wizard.locale    = window.lang;
+        Std.ui.wizard.labelText = function(str){
+            return str + ": ";
+        };
+
         if(this.language.name && this.language.text){
             return {name:this.language.name,text:this.language.text};
         }

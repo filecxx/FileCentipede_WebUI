@@ -4,6 +4,7 @@ Std.ui.module("filecxx_filters",
     option:{
         width:620,
         height:310,
+        modal:true,
         title:lang("filter"),
         titleIcon:"icons/16/filter.svg",
     },

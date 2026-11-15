@@ -79,7 +79,8 @@ Std.ui.module("filecxx_webui",
                                 text:lang("exit"),
                                 icon:"icons/16/exit.svg",
                                 click:function(){
-                                    window.close()
+                                    filecxx_rpc.config.host = "";
+                                    filecxx_rpc.close();
                                 }
                             }
                         ]
@@ -176,7 +177,11 @@ Std.ui.module("filecxx_webui",
                 items:[
                     {ui:"Label",text:lang("catalogs"),css:{color:"gray"}},
                     {ui:"stretch",level:3},
-                    {ui:"ToolButton",styleType:"icon",iconWidth:16,iconHeight:16,icon:"icons/24/add.svg"}
+                    {ui:"ToolButton",styleType:"icon",iconWidth:16,iconHeight:16,icon:"icons/24/add.svg",click:function(){
+                        filecxx_wui.run_module("modules/catalogs/edit.js","filecxx_catalogs_add",{
+                            title:lang("add_catalog"),
+                        })
+                    }}
                 ]
             });
             this.layout_left_.append({ui:"sep",className:"left_sep_"});
@@ -195,7 +200,10 @@ Std.ui.module("filecxx_webui",
                 height:28,
                 icon:"icons/16/download.svg",
                 text:"0.00 B/s",
-                css:"color:#00477d"
+                css:"color:#00477d",
+                click:function(){
+                    filecxx_wui.run_module("modules/settings/speed_limit_download.js","filecxx_speed_limit_download",{})
+                }
             });
             this.status_upload_speed_limit_ = Std.ui("ToolButton",{
                 styleType:"textBesideIcon",
@@ -205,7 +213,10 @@ Std.ui.module("filecxx_webui",
                 iconHeight:16,
                 icon:"icons/16/upload.svg",
                 text:"0.00 B/s",
-                css:"color:#4b1e1e"
+                css:"color:#4b1e1e",
+                click:function(){
+                    filecxx_wui.run_module("modules/settings/speed_limit_upload.js","filecxx_speed_limit_upload",{})
+                }
             })
 
             this.statusbar_ = Std.ui("StatusBar",{
@@ -241,7 +252,6 @@ Std.ui.module("filecxx_webui",
             filecxx_rpc.config = {
                 host:     Std.cookie.get("filecxx_wui_host") || "",
                 port:     Std.cookie.get("filecxx_wui_port") || 10111,
-                ssl:      Std.cookie.get("filecxx_wui_ssl")  || false,
                 username: Std.cookie.get("filecxx_wui_username") || "",
                 password: Std.cookie.get("filecxx_wui_password") || ""
             }
@@ -277,6 +287,8 @@ Std.ui.module("filecxx_webui",
             this.status_download_speed_limit_.text(bytes_to_str(values.global_speed_download) + "/s")
             this.status_upload_speed_limit_.text(bytes_to_str(values.global_speed_upload) + "/s")
             this.statusbar_layout_.update()
+
+            filecxx_wui.global_status = values;
             //console.log(values)
         }
     },
@@ -311,6 +323,18 @@ Std.main.hold(function(holder,handler)
 */
 Std.main(function()
 {
+    Std.ui.wizard.options({
+        port:{
+            ui:"SpinBox",
+            min:0,
+            max:65534,
+            type:"uint",
+        },
+        password:{
+            echoMode:"password"
+        }
+    });
+
     filecxx_wui.groups   = Std.ui("filecxx_groups",{});
     filecxx_wui.catalogs = Std.ui("filecxx_catalogs",{});
     filecxx_wui.tasks    = Std.ui("filecxx_tasks",{});
@@ -323,5 +347,14 @@ Std.main(function()
         filecxx_wui.main.width(this.width());
         filecxx_wui.main.height(this.height());
     });
-    Std.dom("title").text(filecxx_wui.lang.format('${software_name_} WebUI ' + filecxx_wui.version.toFixed(2)))
+    Std.dom("title").text(filecxx_wui.lang.format('${software_name_} WebUI ' + filecxx_wui.version.toFixed(2)));
+
+    try{
+        let url = new URL(window.location.href);
+
+        if(url.searchParams.has("url")){
+            let task_url = url.searchParams.get("url");
+            //todo:
+        }
+    }catch(e){}
 });

@@ -4,6 +4,7 @@ Std.ui.module("filecxx_bt_trackers",
     option:{
         width:620,
         height:310,
+        modal:true,
         title:"BT " + lang("tracker"),
         titleIcon:"icons/16/tracker.svg",
     },

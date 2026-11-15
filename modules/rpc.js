@@ -20,6 +20,8 @@ filecxx_wui.rpc =
             {
                 if(that.connecting_window_.visible()){
                     that.connect(callback)
+                }else if(!filecxx_rpc.config.host){
+                    that.show_connector(callback);
                 }else{
                     that.show_connecting(callback)
                 }
@@ -74,30 +76,15 @@ filecxx_wui.rpc =
     },
     show_connector:function(callback)
     {
-        let that    = this;
-        let widgets = Std.ui.create({
-            host:{
-                ui:"LineEdit",
-                value:filecxx_rpc.config.host || "localhost"
-            },
-            port:{
-                ui:"SpinBox",
-                min:0,
-                max:65535,
-                type:"int",
-                value:filecxx_rpc.config.port
-            },
-            username:{
-                ui:"LineEdit",
-                value:filecxx_rpc.config.username,
-                placeHolder:lang("optional")
-            },
-            password:{
-                ui:"LineEdit",
-                echoMode:"password",
-                value:filecxx_rpc.config.password,
-                placeHolder:lang("optional")
-            }
+        let that   = this;
+        let wizard = Std.ui.wizard(filecxx_rpc.config,{
+            layout:"GridLayout"
+        });
+
+        wizard.options("*",{
+            host: {value:filecxx_rpc.config.host || "localhost"},
+            username:{placeHolder:lang("optional")},
+            password:{placeHolder:lang("optional"),echoMode:"password"},
         });
 
         let conn_btn = {
@@ -107,8 +94,10 @@ filecxx_wui.rpc =
             icon:"icons/16/connect.svg",
             click:function()
             {
-                if(widgets.host.value().length > 0){
-                    Std.extend(filecxx_rpc.config,Std.ui.values(widgets));
+                let values = wizard.values();
+
+                if(values.host.length > 0){
+                    Std.extend(filecxx_rpc.config,values);
                     that.setting_window_.close();
                     that.show_connecting(callback);
                 }
@@ -125,24 +114,10 @@ filecxx_wui.rpc =
             layout:{
                 ui:"VBoxLayout",
                 items:[
-                    {
-                        ui:"GridLayout",
-                        columnCount:2,
-                        columnSpacing:8,
-                        rowSpacing:6,
-                        items:[
-                            {ui:"Label",text:lang("host") + ": "}, widgets.host,
-                            {ui:"Label",text:lang("port") + ": "}, widgets.port,
-                            {ui:"Label",text:lang("username") + ": "}, widgets.username,
-                            {ui:"Label",text:lang("password") + ": "}, widgets.password
-                        ]
-                    },
+                    wizard.layout({columnCount:2,columnSpacing:8,rowSpacing:6}),
                     {
                         ui:"HBoxLayout",
-                        items:[
-                            {ui:"stretch",level:3},
-                            conn_btn
-                        ]
+                        items:[{ui:"stretch"}, conn_btn]
                     }
                 ]
             }

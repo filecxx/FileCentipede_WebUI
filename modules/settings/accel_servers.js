@@ -4,6 +4,7 @@ Std.ui.module("filecxx_accel_servers",
     option:{
         width:620,
         height:310,
+        modal:true,
         title:lang("accel_servers"),
         titleIcon:"icons/16/rocket.svg",
     },

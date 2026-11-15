@@ -4,6 +4,7 @@ Std.ui.module("filecxx_proxies",
     option:{
         width:620,
         height:310,
+        modal:true,
         title:lang("proxy"),
         titleIcon:"icons/16/proxy.svg",
     },

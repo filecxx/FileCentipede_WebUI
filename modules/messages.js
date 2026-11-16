@@ -1,20 +1,16 @@
 filecxx_wui.messages =
 {
-    "error":function(msg)
+    error:function(msg)
     {
-
+        Std.ui("MessageBox").error(JSON.stringify(msg));
     },
-    "pong":function(msg)
+    pong:function(msg)
     {
-
+        filecxx_wui.main.on_pong(new Date().getTime() - msg.t);
     },
-    "heartbeat":function(msg)
+    invalid:function(msg)
     {
-
-    },
-    "invalid":function(msg)
-    {
-
+        Std.ui("MessageBox").error(JSON.stringify(msg));
     },
 
 
@@ -197,23 +193,19 @@ filecxx_wui.messages =
     {
 
     },
-    "task_remove":function(msg)
+    task_remove:function(msg)
     {
-
+        filecxx_wui.tasks.on_task_removed(msg);
     },
     "task_move":function(msg)
     {
 
     },
-    "task_rename":function(msg)
+    task_rename:function(msg)
     {
-
+        filecxx_wui.tasks.on_task_renamed(msg);
     },
     "task_redownload":function(msg)
-    {
-
-    },
-    "task_refresh_address":function(msg)
     {
 
     },
@@ -231,7 +223,7 @@ filecxx_wui.messages =
     },
     task_status:function(msg)
     {
-        filecxx_wui.tasks.task_status(msg);
+        filecxx_wui.tasks.on_task_status(msg);
     },
     "task_progress":function(msg)
     {
@@ -409,23 +401,28 @@ filecxx_wui.messages =
 
     },
 
-    "ports":function(msg)
+    ports:function(msg)
     {
-
+        //todo:
     },
 
-    "transcoding_media":function(msg)
+    transcoding_media:function(msg)
     {
-
+        //todo:
     },
-    "av_merge":function(msg)
+    av_merge:function(msg)
     {
-
+        //todo:
     },
 
-    "bind_service_port_error":function(msg)
+    bind_service_port_error:function(msg)
     {
+        let str = "";
+        str += lang("port") + ":" + msg.port;
+        str += "<br/>";
+        str += lang("service_port_bind_error_msg_");
 
+        Std.ui("MessageBox").error(str);
     },
 
 
@@ -434,6 +431,9 @@ filecxx_wui.messages =
     {
         if(msg.version < 2.91){
             Std.ui("MessageBox").error("Backend version is too low: " + msg.version);
+            return;
+        }else if(msg.version >= 3.0){
+            Std.ui("MessageBox").error("Backend version is too high: " + msg.version);
             return;
         }
         filecxx_wui.version_backend = msg.version;
@@ -445,7 +445,6 @@ filecxx_wui.messages =
             return;
         }
         filecxx_wui.tasks.clear();
-
 
         filecxx_rpc.send("configs");
         filecxx_rpc.send("proxies");

@@ -82,6 +82,20 @@
         .StdUI_Progress > ._location{
             transition: none;
         }
+        .StdUI_TabButton.tasks_tab_button.selected{
+            border-top: 2px solid #4aabdb;
+            padding: 0 12px 0 12px;
+        }
+        .StdUI_List.focused{
+            border-color: transparent;
+        }
+
+        .settings_list,.StdUI_List.settings_list.focused{
+            background: white;
+            border: 1px solid #bcbebf;
+            border-right-color: #a3a5a6;
+            border-bottom-color: #a3a5a6;
+        }
         .tasks_main
         {
 
@@ -96,13 +110,7 @@
             text-overflow: ellipsis;
             background-repeat: no-repeat;
         }
-        .StdUI_TabButton.tasks_tab_button.selected{
-            border-top: 2px solid #4aabdb;
-            padding: 0 12px 0 12px;
-        }
-        .StdUI_List.focused{
-            border-color: transparent;
-        }
+
         a.url_link{
             color: #236484;
         }

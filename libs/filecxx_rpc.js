@@ -13,7 +13,7 @@ var filecxx_rpc =
     config:{
         host:"",
         port:10111,
-        //ssl:false,
+        ssl:false,
         username:"",
         password:"",
     },
@@ -50,8 +50,7 @@ var filecxx_rpc =
     connect:function()
     {
         let that     = this;
-        //let protocol = that.config.ssl ? "wss" : "ws";
-        let protocol = "ws";
+        let protocol = that.config.ssl ? "wss" : "ws";
         let url      =  protocol + '://' + that.config.host + ":" + that.config.port + "/wsc";
 
         that.websocket_ = new WebSocket(url);

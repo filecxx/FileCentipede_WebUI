@@ -1,10 +1,12 @@
-Std.ui.module("filecxx_catalogs_add",
+Std.ui.module("filecxx_catalogs_edit",
 {
     parent:"Window",
     option:{
         value:null,
         width:520,
-        height:360
+        height:360,
+        acceptEsc:true,
+        maximizable:true,
     },
     initialize:
     {

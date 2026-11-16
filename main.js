@@ -27,33 +27,41 @@ Std.ui.module("filecxx_webui",
     {
         init_layout:function()
         {
-            this.layout_left_ = Std.ui("VBoxLayout",{});
-            this.panel_left_ = Std.ui("widget",{
+            var that = this;
+
+            that.layout_left_ = Std.ui("VBoxLayout",{});
+            that.panel_left_  = Std.ui("widget",{
                 level:4,
                 width:220,
                 fixedWidth:220,
-                layout: this.layout_left_
+                layout: this.layout_left_,
+                plugins:{
+                    resize:{
+                        top:false,
+                        bottom:false,
+                        on:{
+                            stop:function(){
+                                that.layout().update()
+                            }
+                        }
+                    }
+                },
             });
 
-            this.layout_right_ = Std.ui("VBoxLayout",{
+            that.layout_right_ = Std.ui("VBoxLayout",{
                 level:4
             });
-            this.layout_body_ = Std.ui("HBoxLayout",{
+            that.layout_body_ = Std.ui("HBoxLayout",{
                 spacing:10,
-                items:[
-                    this.panel_left_,
-                    this.layout_right_
-                ]
+                items:[that.panel_left_, that.layout_right_]
             });
 
-            this.layout_ = Std.ui("VBoxLayout",
+            that.layout_ = Std.ui("VBoxLayout",
             {
                 spacing: 12,
-                items:[
-                    this.layout_body_
-                ]
+                items:[that.layout_body_]
             });
-            this.layout(this.layout_);
+            that.layout(that.layout_);
         },
 
         init_menubar:function()
@@ -79,6 +87,7 @@ Std.ui.module("filecxx_webui",
                                 text:lang("exit"),
                                 icon:"icons/16/exit.svg",
                                 click:function(){
+                                    Std.cookie.set("filecxx_wui_host","")
                                     filecxx_rpc.config.host = "";
                                     filecxx_rpc.close();
                                 }
@@ -178,7 +187,7 @@ Std.ui.module("filecxx_webui",
                     {ui:"Label",text:lang("catalogs"),css:{color:"gray"}},
                     {ui:"stretch",level:3},
                     {ui:"ToolButton",styleType:"icon",iconWidth:16,iconHeight:16,icon:"icons/24/add.svg",click:function(){
-                        filecxx_wui.run_module("modules/catalogs/edit.js","filecxx_catalogs_add",{
+                        filecxx_wui.run_module("modules/catalogs/edit.js","filecxx_catalogs_edit",{
                             title:lang("add_catalog"),
                         })
                     }}
@@ -189,8 +198,11 @@ Std.ui.module("filecxx_webui",
         },
         init_statusbar:function()
         {
+            this.status_ping_ = Std.ui("Label",{
+                text:"Ping: 0ms",
+            });
             this.status_dht_ = Std.ui("Label",{
-                text:"DHT Nodes: 0"
+                text:"DHT Nodes: 0",
             });
             this.status_download_speed_limit_ = Std.ui("ToolButton",{
                 styleType:"textBesideIcon",
@@ -224,12 +236,14 @@ Std.ui.module("filecxx_webui",
             })
             this.statusbar_layout_ = Std.ui("HBoxLayout",
             {
-                spacing:4,
+                spacing:12,
                 items:[
                     this.statusbar_,
 
                     {ui:"stretch",level:3},
 
+                    this.status_ping_,
+                    {ui:"sep",level:1,className:"statusbar_sep_"},
                     this.status_dht_,
                     {ui:"sep",level:1,className:"statusbar_sep_"},
                     this.status_download_speed_limit_,
@@ -252,6 +266,7 @@ Std.ui.module("filecxx_webui",
             filecxx_rpc.config = {
                 host:     Std.cookie.get("filecxx_wui_host") || "",
                 port:     Std.cookie.get("filecxx_wui_port") || 10111,
+                ssl:      Std.cookie.get("filecxx_wui_ssl") || false,
                 username: Std.cookie.get("filecxx_wui_username") || "",
                 password: Std.cookie.get("filecxx_wui_password") || ""
             }
@@ -274,13 +289,27 @@ Std.ui.module("filecxx_webui",
             that.status_timer_ = setInterval(function()
             {
                 if(filecxx_rpc.is_established()){
-                    filecxx_rpc.send("status")
+                    filecxx_rpc.send("ping",{"t": new Date().getTime()});
+                    filecxx_rpc.send("status");
                 }
             },500);
+        },
+        init_keyboard:function()
+        {
+            var that = this;
+
+            Std.dom(window).on("keydown",function(e)
+            {
+
+            });
         }
     },
     public:
     {
+        on_pong:function(delay)
+        {
+            this.status_ping_.text("Ping: " + delay + "ms");
+        },
         on_status:function(values)
         {
             this.status_dht_.text("DHT Nodes: " + values.torrent_DHT_peers);
@@ -294,6 +323,7 @@ Std.ui.module("filecxx_webui",
     },
     main:function(that,opts)
     {
+        that[0].unselect(true);
         that.init_layout();
 
         that.init_menubar();
@@ -304,6 +334,7 @@ Std.ui.module("filecxx_webui",
 
         that.init_rpc();
         that.init_timer();
+        that.init_keyboard();
     }
 });
 

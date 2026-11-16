@@ -3,8 +3,10 @@ Std.ui.module("filecxx_task_add",
     parent:"Window",
     option:{
         acceptEsc:true,
+        maximizable:true,
         width:620,
         height:350,
+        type:"add_task", //add_task, add_directory, add_stream
         title:lang("task_add"),
         titleIcon:"icons/24/add.svg",
     },
@@ -17,22 +19,117 @@ filec, fileu, thunder, flashget, qqdl, JSON
 
 [\${command_line}] :
 curl, wget, aria2, axel
+`,
+
+        directory_addresses_placeholder:`[\${protocol}] :
+WebDAV(HTTP, HTTPS), FTP, FTPS, SFTP, SSH
+
+[\${custom_protocol}] :
+filec, fileu, JSON
+
+[\${command_line}] :
+curl, wget, aria2, axel
+
+\${example}:
+http://user:password@filecxx.com/dav/
+        `,
+
+        stream_addresses_placeholder:`[\${protocol}] :
+m3u8, mpd, json
+
+\${example}:
+http://test.filecxx.com/stream/1.m3u8
+http://test.filecxx.com/stream/1.mpd
 `
+
+    },
+    extend:{
+        destroy:function()
+        {
+            var that = this;
+
+            if(that.timer_change_ !== -1){
+                clearTimeout(that.timer_change_);
+                that.timer_change_ = -1;
+            }
+        }
+    },
+    private:{
+        timer_change: -1,
+        addresses:""
+    },
+    protected:
+    {
+        on_change:function(text)
+        {
+            let that = this;
+
+            that.addresses_ = text;
+        }
     },
     public:{
+        /*
+         * send download
+        */
+        send_download:function(later)
+        {
+            let that = this;
+            let opts = that.opts;
+            let mode = 0;
+
+            that.addresses_.split("\n").each((_,line)=>
+            {
+                let uri      = line.trim();
+                let msg_type = "task_add";
+
+                if(opts.type === "add_directory"){
+                    mode |= filecxx_rpc.task_modes.Task_Mode_Directory;
+                }else if(opts.type === "add_stream"){
+                    msg_type = "task_add_stream"
+                }
+                filecxx_rpc.send(msg_type,{
+                    uri:uri,
+                    later:later,
+                    mode:mode
+                })
+            })
+        }
 
     },
     initialize:
     {
         init_ui:function()
         {
-            let that = this;
+            let that        = this;
+            let opts        = that.opts;
+            let self        = Std.ui.module("filecxx_task_add");
+            let placeholder = "";
 
+            if(opts.type === "add_task"){
+                placeholder = self.addresses_placeholder;
+            }else if(opts.type === "add_directory"){
+                placeholder = self.directory_addresses_placeholder;
+            }else if(opts.type === "add_stream"){
+                placeholder = self.stream_addresses_placeholder;
+            }
             that.widgets_ = Std.ui.create(
             {
                 addresses:{
                     ui:"TextEdit",
-                    placeHolder:filecxx_wui.lang.format(Std.ui.module("filecxx_task_add").addresses_placeholder).replaceAll(/\r?\n/g, '<br/>')
+                    placeHolder:filecxx_wui.lang.format(placeholder.replaceAll(/\r?\n/g, '<br/>')),
+                    on:{
+                        input:function(val)
+                        {
+                            if(that.timer_change_ !== -1){
+                                clearTimeout(that.timer_change_);
+                                that.timer_change_ = -1;
+                            }
+                            that.timer_change_ = setTimeout(function(){
+                                that.on_change(val)
+                                that.timer_change_ = -1;
+                            },500);
+                        }
+                    }
                 },
                 download_later:{
                     ui:"Button",
@@ -40,7 +137,11 @@ curl, wget, aria2, axel
                     iconHeight:16,
                     styleType: "textBesideIcon",
                     icon:"icons/16/delay.svg",
-                    text:lang("download_later")
+                    text:lang("download_later"),
+                    click:function(){
+                        that.send_download(true);
+                        that.close();
+                    }
                 },
                 download_now:{
                     ui:"Button",
@@ -48,7 +149,11 @@ curl, wget, aria2, axel
                     iconHeight:16,
                     styleType: "textBesideIcon",
                     icon:"icons/16/download.svg",
-                    text:lang("download_now")
+                    text:lang("download_now"),
+                    click:function(){
+                        that.send_download();
+                        that.close();
+                    }
                 },
                 layout:{
                     ui:"VBoxLayout"

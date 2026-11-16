@@ -22,10 +22,32 @@ Std.ui.module("filecxx_catalogs",
             that.plugin("contextMenu",{
                 items:[
                     {
-                        text:"TODO"
+                        text:lang("add"),
+                        icon:"icons/24/add.svg",
+                        click:function()
+                        {
+                            filecxx_wui.run_module("modules/catalogs/edit.js","filecxx_catalogs_edit",{
+                                title:lang("add_catalog"),
+                            })
+                        }
                     },
                     {
-                        text:"TODO"
+                        text:lang("edit"),
+                        icon:"icons/16/edit.svg",
+                        click:function()
+                        {
+                            filecxx_wui.run_module("modules/catalogs/edit.js","filecxx_catalogs_edit",{
+                                title:lang("edit"),
+                            })
+                        }
+                    },
+                    {
+                        text:lang("delete"),
+                        icon:"icons/16/delete.svg",
+                        click:function()
+                        {
+
+                        }
                     }
                 ]
             });

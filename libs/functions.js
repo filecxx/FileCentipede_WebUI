@@ -41,8 +41,8 @@ function format_ns_time(nanoseconds)
 
 function seconds_to_duration(seconds, max)
 {
-    const units = "SMHdmY";
-    const bases = [1, 60, 3600, 86400, 2592000, 31536000];
+    let units   = "SMHdmY";
+    let bases   = [1, 60, 3600, 86400, 2592000, 31536000];
     let highest = units.indexOf(max);
 
     if (typeof max !== "string" || max.length !== 1 || highest < 0 ||
@@ -52,7 +52,8 @@ function seconds_to_duration(seconds, max)
 
     const parts = [];
 
-    for (let i = highest; i >= 0; i--) {
+    for(let i = highest; i >= 0; i--)
+    {
         const value = seconds > 0 ? Math.floor(seconds / bases[i]) : 0;
         seconds -= value * bases[i];
 

@@ -25,11 +25,10 @@ filecxx_wui.rpc =
                 }else{
                     that.show_connecting(callback)
                 }
-            },1000);
+            },500);
         }
         filecxx_rpc.on_message = function(message)
         {
-            //console.log(message)
             let msg_type = message["@"];
             delete message["@"];
 
@@ -106,7 +105,7 @@ filecxx_wui.rpc =
 
         that.setting_window_ = Std.ui("Window",{
             width:340,
-            height:220,
+            height:250,
             title:lang("config"),
             titleIcon:"icons/16/connect.svg",
             modal:true,

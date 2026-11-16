@@ -23,7 +23,10 @@ Std.ui.module("filecxx_tasks",
             this.actions = {
                 open:{
                     text:lang("open"),
-                    icon:"icons/24/add_file.svg"
+                    icon:"icons/24/add_file.svg",
+                    click:function(){
+                        filecxx_wui.run_module("modules/tasks/open.js","filecxx_task_open")
+                    }
                 },
                 start:{
                     text:lang("start"),
@@ -52,10 +55,8 @@ Std.ui.module("filecxx_tasks",
                     {
                         that.selected_tasks(function(row,values){
                             filecxx_wui.run_module("modules/tasks/rename.js","filecxx_task_rename",{
-                                file_name:values.file_name,
-                                callback:function(new_name){
-
-                                }
+                                value:values.file_name,
+                                task_attr:values
                             })
                             //filecxx_rpc.send("task_remove",{id:values.id,type:values.type})
                         });
@@ -82,16 +83,27 @@ Std.ui.module("filecxx_tasks",
                     text:lang("delete"),
                     icon:"icons/24/delete.svg",
                     click:function(){
-
+                        that.delete_selected_tasks();
                     }
+                },
+                refresh_address:{
+                    text:lang("refresh_address"),
+                    icon:"icons/16/refresh.svg",
+                    enable:false
                 },
                 edit:{
                     text:lang("edit"),
-                    icon:"icons/16/edit.svg"
+                    icon:"icons/16/edit.svg",
+                    click:function(){
+                        that.edit_selected_tasks();
+                    }
                 },
                 redownload:{
                     text:lang("redownload"),
-                    icon:"icons/16/download.svg"
+                    icon:"icons/16/download.svg",
+                    click:function(){
+                        that.redownload_selected_tasks();
+                    }
                 },
             };
         },
@@ -113,8 +125,13 @@ Std.ui.module("filecxx_tasks",
         },
         init_toolbar:function()
         {
-            let actions = this.actions;
-
+            let actions  = this.actions;
+            let add_task_act = function(name,type)
+            {
+                return filecxx_wui.module_action(name,"icons/24/add.svg","modules/tasks/add.js","filecxx_task_add",{
+                    type:type
+                })
+            }
             this.toolbar_ = Std.ui("ToolBar",
             {
                 iconWidth:24,
@@ -128,9 +145,9 @@ Std.ui.module("filecxx_tasks",
                         dropdown:Std.ui("Menu",
                         {
                             items:[
-                                filecxx_wui.module_action("add","icons/24/add.svg","modules/tasks/add.js","filecxx_task_add"),
-                                filecxx_wui.module_action("add_directory","icons/24/add.svg","modules/tasks/add_directory.js","filecxx_task_add_directory"),
-                                filecxx_wui.module_action("add_stream","icons/24/stream.svg","modules/tasks/add_stream.js","filecxx_task_add_stream"),
+                                add_task_act("add","add_task"),
+                                add_task_act("add_directory","add_directory"),
+                                add_task_act("add_stream","add_stream"),
                             ]
                         }),
                         on:{
@@ -207,10 +224,6 @@ Std.ui.module("filecxx_tasks",
                             }
                             elem.css("background-image",`url("icons/mimetypes/24/${icon}.png")`)
                             cell.html(elem);
-
-                            if(cell.row.data.color){
-                                cell.row.color(cell.row.data.color)
-                            }
                         }
                     },
                     file_size:
@@ -232,6 +245,9 @@ Std.ui.module("filecxx_tasks",
                                 cell.html(lang(filecxx_rpc.task_state_texts[data]));
                             }else if(isString(data)){
                                 cell.html(data);
+                            }
+                            if(cell.row.data.color){
+                                cell.row.color(cell.row.data.color)
                             }
                         }
                     },
@@ -297,6 +313,7 @@ Std.ui.module("filecxx_tasks",
                         actions.open_directory,
                         {ui:"sep"},
                         actions.redownload,
+                        actions.refresh_address,
                         actions.edit,
                         {ui:"sep"},
                         {
@@ -403,6 +420,13 @@ Std.ui.module("filecxx_tasks",
             {
                 switch(e.key)
                 {
+                case "a":
+                    if(e.ctrlKey){
+                        //that.grid_.selectRow(0);
+                        //that.grid_.selectRange(0,0,that.grid_.rowCount(),that.grid_.columnCount());
+                        //e.preventDefault();
+                    }
+                    break;
                 case "F2":
                     that.actions.rename.click();
                     e.preventDefault();
@@ -465,7 +489,17 @@ Std.ui.module("filecxx_tasks",
                 return "";
             }
         },
+        /*
+         * erase task
+        */
+        erase_task:function(id)
+        {
+            let that = this;
 
+            that.tasks_all.delete(id + "");
+            that.tasks_active.delete(id + "");
+            that.tasks_confirming.delete(id + "");
+        },
 
         /*
          * on interval 1s
@@ -553,7 +587,6 @@ Std.ui.module("filecxx_tasks",
             that.sort_tasks();
         },
 
-
         /*
          * remove task
         */
@@ -573,6 +606,63 @@ Std.ui.module("filecxx_tasks",
             that.tasks_confirming.delete(id);
 
             filecxx_rpc.send("task_remove",{id:id, type:type, delete_file: delete_file});
+        },
+
+        /*
+         * start_selected_tasks
+        */
+        start_selected_tasks:function()
+        {
+
+        },
+        /*
+         * stop_selected_tasks
+        */
+        stop_selected_tasks:function()
+        {
+
+        },
+        /*
+         * edit_selected_tasks
+        */
+        edit_selected_tasks:function()
+        {
+
+        },
+        /*
+         * delete_selected_tasks
+        */
+        delete_selected_tasks:function()
+        {
+
+        },
+        /*
+         * redownload_selected_tasks
+        */
+        redownload_selected_tasks:function()
+        {
+            let that = this;
+            let grid = that.grid_;
+            let rows = grid.selectedRows(true);
+
+            rows.each(function(_,row)
+            {
+                let id     = row.data_value.id;
+                let values = row.data_value.values;
+
+                filecxx_rpc.send("task_redownload",{
+                    id: id,
+                    type: values.type,
+                })
+                that.tasks_active.set(id,{
+                    id:id,
+                    type:values.type,
+                    state:values.state,
+                    confirmed:false,
+                    progress:values.progress
+                });
+                //tasks_active_.emplace(id,active_task_t{task.type,task.state,task.full_status,false,0});
+            })
         },
         /*
          * update task
@@ -595,7 +685,7 @@ Std.ui.module("filecxx_tasks",
             {
                 let owner = grid.row(values.id + "",true);
 
-                row.data_value.color  = that.row_color(row.data_value.values.state);
+                row.color             = that.row_color(row.data_value.values.state);
                 row.data_value.folder = that.is_folder(values);
 
                 if(owner){
@@ -645,19 +735,6 @@ Std.ui.module("filecxx_tasks",
             //that.on_task_state(values.state,id,grid.row(grid.rowCount() - 1));
         },
         /*
-         * task status
-        */
-        task_status:function(values)
-        {
-            if(!this.update_task(values)){
-                this.add_task(values);
-            }
-
-            setTimeout(function(){
-                //this.grid_.sortColumn()
-            },1000);
-        },
-        /*
          * clear
         */
         clear:function()
@@ -669,7 +746,63 @@ Std.ui.module("filecxx_tasks",
             that.tasks_active.clear();
             that.tasks_confirming.clear();
             that.hidden_rows.clear();
-        }
+        },
+
+        ///------------------
+        /*
+         * task status
+        */
+        on_task_status:function(values)
+        {
+            if(!this.update_task(values)){
+                this.add_task(values);
+            }
+            setTimeout(function(){
+                //this.grid_.sortColumn()
+            },1000);
+        },
+        /*
+         * on_task_renamed
+        */
+        on_task_renamed:function(values)
+        {
+            let that  = this;
+            let tasks = that.tasks_all;
+            let grid  = that.grid_;
+
+            if(!tasks.has(values.id)){
+                return;
+            }
+            let task = tasks.get(values.id);
+            let row  = grid.row(values.id + "");
+
+            task.file_name = values.file_name;
+
+            if(row)
+            {
+                let owner = grid.row(values.id + "",true);
+
+                if(owner){
+                    owner.update();
+                }
+            }
+        },
+        /*
+         * on_task_removed
+        */
+        on_task_removed:function(values)
+        {
+            let that = this;
+            let grid = that.grid_;
+            let row  = grid.row(values.id + "");
+
+            that.erase_task(values.id);
+
+            if(row){
+                let index = grid.rowName2Index(values.id + "");
+                grid.removeRow(index);
+            }
+        },
     },
     main:function(that,opts)
     {

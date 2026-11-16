@@ -1,6 +1,6 @@
 var filecxx_wui =
 {
-    version: 1.0,
+    version: 0.10,
     version_backend: 0,
     data:{},
     global_status:null,
@@ -17,7 +17,15 @@ var filecxx_wui =
     },
     run_module:function(path,entry,opts)
     {
+        var locker = Std.ui("locker",{
+            renderTo:"body",
+            visible:true,
+            cursor:"wait",
+            opacity:0
+        });
+
         Std.loader.js(path,function(){
+            locker.remove();
             Std.ui(entry,(opts && isObject(opts)) ? opts : {})
         });
     },

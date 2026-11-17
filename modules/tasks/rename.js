@@ -4,12 +4,10 @@ Std.ui.module("filecxx_task_rename",
     option:{
         title:lang("rename"),
         text:lang("file_name"),
-        width:400,
         inputWidth:300,
         inputHeight:26,
         inputType:"LineEdit",
         buttons:"cancel ok",
-        buttonsAlign:"center",
         task_attr:null,
         on:{
             ok:function()

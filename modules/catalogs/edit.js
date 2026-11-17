@@ -14,7 +14,7 @@ Std.ui.module("filecxx_catalogs_edit",
         {
             var that   = this;
             var opts   = that.opts;
-            var wizard = Std.ui.wizard(opts.value || {
+            var wizard = that.wizard_ = Std.ui.wizard(opts.value || {
                 name: "",
                 path: "",
                 icon: "",
@@ -35,7 +35,6 @@ Std.ui.module("filecxx_catalogs_edit",
                 padding:6,
                 maxStretchableColumns:1,
             });
-            that.wizard_ = wizard;
             that.layout(layout)
         },
         init_events:function()

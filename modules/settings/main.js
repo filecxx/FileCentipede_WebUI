@@ -38,6 +38,10 @@ Std.ui.module("filecxx_settings",
         create_wizard_opts:function(wizard)
         {
             wizard.options("*",{
+                method: "http_method",
+                pass: "password",
+                seeding_limit_speed_limit:"speed_limit",
+
                 enable_partial_ext:{
                     enable:false,
                 },
@@ -53,17 +57,10 @@ Std.ui.module("filecxx_settings",
                     enable:false,
                     items:[lang("auto_rename_file"),lang("skip")]
                 },
-
                 proxy:{
                     ui:"ComboBox",
                     editable:false
                 },
-                proxy_mode:{
-                    ui:"ComboBox",
-                    valueType:"index",
-                    items:[lang("always"),lang("if_available"),lang("as_backup"),lang("round_robin")]
-                },
-
                 client_fingerprint_type:{
                     ui:"ComboBox",
                     valueType:"index",
@@ -108,21 +105,6 @@ Std.ui.module("filecxx_settings",
                     valueType:"index",
                     items:[lang("none"),lang("disconnect"),lang("ban_ip")]
                 },
-                mirrors_mode:{
-                    ui:"ComboBox",
-                    valueType:"index",
-                    items:[lang("round_robin")]
-                },
-                mirrors_proxy:{
-                    ui:"ComboBox",
-                    valueType:"index",
-                    items:[lang("enable"), lang("disable")]
-                },
-                mirrors_path:{
-                    ui:"ComboBox",
-                    valueType:"index",
-                    items:[lang("replace_origin_host"), lang("prepend_before_origin_url"), lang("replace_origin_url")]
-                },
                 attr_last_modified:{
                     ui:"ComboBox",
                     valueType:"index",
@@ -133,38 +115,12 @@ Std.ui.module("filecxx_settings",
                     valueType:"index",
                     items:[lang("local"), lang("remote")]
                 },
-                parallel:{
-                    ui:"ComboBox",
-                    valueType:"index",
-                    items:[lang("smooth"), lang("fastest")]
-                },
-                user_agent:{
-                    ui:"ComboBox",
-                    editable:true
-                },
 
-                method:{
-                    enable:false,
-                },
-                pass:{
-                    echoMode:"password"
-                },
                 client_names:{
                     ui:"TextEdit"
                 },
                 client_names2:{
                     ui:"TextEdit"
-                },
-                headers:{
-                    ui:"TextEdit"
-                },
-
-                preferred_video_quality:{
-                    ui:"ComboBox",
-                    valueType:"index",
-                    items:[
-                        lang("all"), ">= 240p", ">= 360p", ">= 480p", ">= 720p", ">= 1080p", ">= 2K", ">= 4K", ">= 8K",
-                    ]
                 }
             });
         }
@@ -217,7 +173,15 @@ Std.ui.module("filecxx_settings",
                 level:4,
                 width:800,
                 height:600,
-                items:items
+                items:items,
+            }).on("render",function()
+            {
+                this.parent().plugin("resize",{
+                    helper:"original",
+                    opacity:1,
+                    left:false,
+                    top:false
+                })
             });
             //console.log(filecxx_wui.data.configs)
         },
@@ -243,16 +207,6 @@ Std.ui.module("filecxx_settings",
                 width:210,
                 fixedWidth:true,
                 className:"settings_list",
-                plugins:{
-                    resize:{
-                        helper:"original",
-                        on:{
-                            stop:function(){
-                                that.layout().update()
-                            }
-                        }
-                    }
-                },
                 on:{
                     itemSelected:function(index){
                         //console.log(index)
@@ -296,7 +250,10 @@ Std.ui.module("filecxx_settings",
                 items:[
                     {
                         ui:"HBoxLayout",
-                        items:[that.widgets_.list, that.widgets_.client]
+                        items:[that.widgets_.list, that.widgets_.client],
+                        plugins:{
+                            split:true
+                        }
                     },
                     {
                         ui:"HBoxLayout",

@@ -7,6 +7,16 @@ Std.ui.module("filecxx_tasks",
         height:"auto",
         className: "tasks_main",
     },
+    extend:{
+        render:function(){
+            this.parent().plugin("resize",{
+                helper:"original",
+                opacity:1,
+                left:false,
+                top:false
+            });
+        }
+    },
     initialize:
     {
         init_layout()
@@ -627,14 +637,30 @@ Std.ui.module("filecxx_tasks",
         */
         edit_selected_tasks:function()
         {
+            let rows  = this.grid_.selectedRows(true);
 
+            rows.each(function(i,row)
+            {
+                let values = row.data_value.values;
+                let type   = values.type;
+
+                filecxx_rpc.send("task_config",{"#":"task_edit", id:values.id, type:type});
+            });
         },
         /*
          * delete_selected_tasks
         */
         delete_selected_tasks:function()
         {
+            let rows  = this.grid_.selectedRows(true);
+            let attrs = [];
 
+            rows.each(function(i,row){
+                attrs.push(row.data_value.values);
+            });
+            if(attrs.length > 0) {
+                filecxx_wui.run_module("modules/tasks/deleting.js","filecxx_task_deleting",{task_attrs: attrs});
+            }
         },
         /*
          * redownload_selected_tasks

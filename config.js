@@ -5,6 +5,11 @@ var filecxx_wui =
     data:{},
     global_status:null,
 
+    play_mp3(src)
+    {
+        const audio = new Audio(src);
+        audio.play().catch(error => {});
+    },
     module_action(text,icon,path,entry,opts)
     {
         return {
@@ -27,6 +32,130 @@ var filecxx_wui =
         Std.loader.js(path,function(){
             locker.remove();
             Std.ui(entry,(opts && isObject(opts)) ? opts : {})
+        });
+    },
+    init_wizard_options:function()
+    {
+        Std.ui.wizard.options({
+            port:{
+                ui:"SpinBox",
+                min:0,
+                max:65534,
+                type:"uint",
+            },
+            password:{
+                echoMode:"password"
+            },
+            catalog:{
+                ui:"ComboBox"
+            },
+            proxy_mode:{
+                ui:"ComboBox",
+                valueType:"index",
+                items:[lang("always"),lang("if_available"),lang("as_backup"),lang("round_robin")]
+            },
+            mirrors_mode:{
+                ui:"ComboBox",
+                valueType:"index",
+                items:[lang("round_robin")]
+            },
+            mirrors_proxy:{
+                ui:"ComboBox",
+                valueType:"index",
+                items:[lang("enable"), lang("disable")]
+            },
+            mirrors_path:{
+                ui:"ComboBox",
+                valueType:"index",
+                items:[lang("replace_origin_host"), lang("prepend_before_origin_url"), lang("replace_origin_url")]
+            },
+            http_method:{
+                ui:"ComboBox",
+                editable:true,
+                valueType:"text",
+                items:["GET","POST","OPTIONS","PUT","PATCH","TRACE"]
+            },
+            parallel:{
+                ui:"ComboBox",
+                valueType:"index",
+                items:[lang("smooth"), lang("fastest")]
+            },
+            cookies:{
+                ui:"TextEdit"
+            },
+            headers:{
+                ui:"TextEdit"
+            },
+            speed_limit:{
+                ui:"LineEdit",
+                type:"int",
+                label:"KB/s",
+                labelSide:"right"
+            },
+            speed_limit_download:{
+                ui:"LineEdit",
+                type:"int",
+                label:"KB/s",
+                labelSide:"right"
+            },
+            speed_limit_upload:{
+                ui:"LineEdit",
+                type:"int",
+                label:"KB/s",
+                labelSide:"right"
+            },
+            seeding_limit_speed_limit:{
+                ui:"LineEdit",
+                type:"int",
+                label:"KB/s",
+                labelSide:"right"
+            },
+            seeding_limit_act:{
+                ui:"ComboBox",
+                valueType:"index",
+                items:["none","stop","speed_limit","delete_task","delete_task_and_file"]
+            },
+
+            mirror_hosts:{
+                ui:"TextEdit",
+                placeHolder:lang("http_mirrors_placeholder")
+            },
+            preferred_video_quality:{
+                ui:"ComboBox",
+                valueType:"index",
+                items:[
+                    lang("all"), ">= 240p", ">= 360p", ">= 480p", ">= 720p", ">= 1080p", ">= 2K", ">= 4K", ">= 8K",
+                ]
+            },
+            user_agent:{
+                ui:"ComboBox",
+                editable:true,
+                items:[
+                    "Mozilla/5.0 (Linux x86_64) Firefox/78.0",
+                    "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0",
+                    "Mozilla/5.0 (Android 11; Mobile; LG-M255; rv:88.0) Gecko/88.0 Firefox/88.0",
+                    "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.7113.93 Safari/537.36",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4495.0",
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4450.0",
+                    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4464.5 Safari/537.36",
+                    "Mozilla/5.0 (iPad; CPU OS 14_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+                    "Mozilla/5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko",
+                    "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko",
+                    "Mozilla/5.0 (compatible; MSIE 9.0; AOL 9.7; AOLBuild 4343.55; Windows NT 6.1; WOW64; Trident/5.0)",
+                    "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+                    "Mozilla/5.0 (compatible; Bingbot/2.0; +http://www.bing.com/bingbot.htm)",
+                    "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp)",
+                    "DuckDuckBot/1.0; (+http://duckduckgo.com/duckduckbot.html)",
+                    "Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)",
+                    "Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)",
+                    "Sogou web spider/4.0(+http://www.sogou.com/docs/help/webmasters.htm#07)",
+                    "Mozilla/5.0 (compatible; Konqueror/3.5; Linux) KHTML/3.5.5 (like Gecko) (Exabot-Thumbnails)",
+                    "Mozilla/5.0 (compatible; Exabot/3.0; +http://www.exabot.com/go/robot)",
+                    "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
+                    "ia_archiver (+http://www.alexa.com/site/help/webmasters; crawler@alexa.com)",
+                ]
+            },
         });
     },
 };
@@ -55,6 +184,15 @@ filecxx_wui.lang =
         "vi_VN":"Tiếng Việt",
         "zh_CN":"简体中文",
         "zh_TW":"繁體中文",
+    },
+    alias:{
+        mirrors_mode:"mode",
+        mirrors_proxy:"proxy",
+        mirrors_path:"path",
+        mirror_hosts:"hosts",
+        operation_always:"always",
+        operation_seeding:"seeding",
+        attr_last_modified:"last_modified_time"
     },
     parse:function(text)
     {
@@ -120,7 +258,7 @@ filecxx_wui.lang =
             }
             var key = content.substring(index + 2,end);
 
-            result += this.keywords[key];
+            result += this.keywords[filecxx_wui.lang.alias[key] || key] || key;
             index = end;
             end++;
         }
@@ -164,5 +302,9 @@ filecxx_wui.lang =
 
 lang = function(keyword)
 {
+    keyword = filecxx_wui.lang.alias[keyword] || keyword;
+
     return filecxx_wui.lang.keywords[keyword] || keyword;
 }
+
+

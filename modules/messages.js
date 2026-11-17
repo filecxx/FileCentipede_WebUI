@@ -209,9 +209,11 @@ filecxx_wui.messages =
     {
 
     },
-    "task_edit":function(msg)
+    task_edit:function(msg)
     {
-
+        filecxx_wui.run_module("modules/tasks/edit.js","filecxx_task_edit",{
+            task_configs: msg
+        })
     },
     "task_set_catalog":function(msg)
     {

@@ -64,7 +64,9 @@ http://test.filecxx.com/stream/1.mpd
         {
             let that = this;
 
-            that.addresses_ = text;
+            if(isString(text)){
+                that.addresses_ = text;
+            }
         }
     },
     public:{

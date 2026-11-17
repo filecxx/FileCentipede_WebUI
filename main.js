@@ -34,26 +34,18 @@ Std.ui.module("filecxx_webui",
                 level:4,
                 width:220,
                 fixedWidth:220,
-                layout: this.layout_left_,
-                plugins:{
-                    resize:{
-                        top:false,
-                        bottom:false,
-                        on:{
-                            stop:function(){
-                                that.layout().update()
-                            }
-                        }
-                    }
-                },
+                layout: this.layout_left_
             });
 
             that.layout_right_ = Std.ui("VBoxLayout",{
                 level:4
             });
             that.layout_body_ = Std.ui("HBoxLayout",{
-                spacing:10,
-                items:[that.panel_left_, that.layout_right_]
+                spacing:8,
+                items:[that.panel_left_, that.layout_right_],
+                plugins:{
+                    split:true
+                }
             });
 
             that.layout_ = Std.ui("VBoxLayout",
@@ -302,6 +294,42 @@ Std.ui.module("filecxx_webui",
             {
 
             });
+        },
+
+        init_animation:function()
+        {
+            var on_create = function()
+            {
+                this[0].css({opacity:0.5, transform:"scale(0.6)"}).animateTo({
+                    opacity:1,
+                    transform:"scale(1.0)"
+                },{
+                    duration:60,
+                    timingFunction:"ease-in",
+                })
+            }
+            var on_close = function(callback)
+            {
+                this[0].css({opacity:1, transform:"scale(1)"}).animateTo({
+                    opacity:0,
+                    transform:"scale(0.8)"
+                },{
+                    duration:50,
+                    timingFunction:"ease-out",
+                },callback)
+            };
+
+            Std.ui("locker").opts({
+                animation: {
+                    destroy:function(callback) {
+                        this[0].animateTo({opacity:0},{duration:80, timingFunction:"ease-out",},callback)
+                    }
+                }
+            });
+            Std.ui("Window").opts({
+                on:{create:on_create},
+                animation: {close:on_close}
+            });
         }
     },
     public:
@@ -335,6 +363,7 @@ Std.ui.module("filecxx_webui",
         that.init_rpc();
         that.init_timer();
         that.init_keyboard();
+        that.init_animation();
     }
 });
 
@@ -354,18 +383,7 @@ Std.main.hold(function(holder,handler)
 */
 Std.main(function()
 {
-    Std.ui.wizard.options({
-        port:{
-            ui:"SpinBox",
-            min:0,
-            max:65534,
-            type:"uint",
-        },
-        password:{
-            echoMode:"password"
-        }
-    });
-
+    filecxx_wui.init_wizard_options();
     filecxx_wui.groups   = Std.ui("filecxx_groups",{});
     filecxx_wui.catalogs = Std.ui("filecxx_catalogs",{});
     filecxx_wui.tasks    = Std.ui("filecxx_tasks",{});
@@ -388,4 +406,5 @@ Std.main(function()
             //todo:
         }
     }catch(e){}
+
 });

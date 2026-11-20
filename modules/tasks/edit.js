@@ -3,6 +3,7 @@ Std.ui.module("filecxx_task_edit",
     parent:"Window",
     option:{
         acceptEsc:true,
+        maximizable:true,
         width:620,
         height:410,
         title:lang("edit"),
@@ -20,35 +21,34 @@ Std.ui.module("filecxx_task_edit",
         create_action_buttons:function()
         {
             let that = this;
+            let cancel = {
+                ui:"Button",
+                styleType:"textBesideIcon",
+                icon:"icons/16/cancel.svg",
+                iconWidth:16,
+                iconHeight:16,
+                text:lang("cancel"),
+                click:function(){
+                    that.close()
+                }
+            };
+            let save = {
+                ui:"Button",
+                styleType:"textBesideIcon",
+                icon:"icons/16/save.svg",
+                iconWidth:16,
+                iconHeight:16,
+                text:lang("save"),
+                click:function(){
+                    that.on_save(that.wizard_.values());
+                    that.close();
+                }
+            };
 
             return {
                 ui:"HBoxLayout",
                 level:2,
-                items:[
-                    {ui:"stretch",level:3},
-                    {
-                        ui:"Button",
-                        styleType:"textBesideIcon",
-                        icon:"icons/16/cancel.svg",
-                        iconWidth:16,
-                        iconHeight:16,
-                        text:lang("cancel"),
-                        click:function(){
-                            that.close()
-                        }
-                    },
-                    {
-                        ui:"Button",
-                        styleType:"textBesideIcon",
-                        icon:"icons/16/save.svg",
-                        iconWidth:16,
-                        iconHeight:16,
-                        text:lang("save"),
-                        click:function(){
-
-                        }
-                    }
-                ]
+                items:[{ui:"stretch",level:3}, cancel, save]
             }
         }
     },
@@ -71,9 +71,11 @@ Std.ui.module("filecxx_task_edit",
             let that   = this;
             let wizard = that.wizard_ = Std.ui.wizard(values);
 
+            //wizard.valueMode("pairs");
             wizard.fields(fields);
             wizard.options("*",{
                 method: "http_method",
+                proxy:"task_proxy",
                 uri:{ui:"TextEdit"},
                 speed_limit_download:"speed_limit",
                 file_name:{readOnly:true},
@@ -88,9 +90,36 @@ Std.ui.module("filecxx_task_edit",
                 items:[layout, that.create_action_buttons()]
             });
         },
-        init_ftp_layout()
+        init_ftp_layout(values)
         {
+            const fields = {
+                attributes:[
+                    "connect_timeout","max_retry","max_connections","speed_limit_download","speed_limit_upload",
+                    "user","pass",
+                    "file_name","catalog","save_path","proxy","proxy_mode",
+                    "ignore_remote_modified","ignore_server_busy","auto_rename_file","no_task_record"
+                ],
+                address:["uri"],
+            }
+            let that   = this;
+            let wizard = that.wizard_ = Std.ui.wizard(values);
 
+            wizard.fields(fields);
+            wizard.options("*",{
+                proxy:"task_proxy",
+                uri:{ui:"TextEdit"},
+                pass:"password",
+                file_name:{readOnly:true},
+                save_path:{readOnly:true}
+            });
+            let layout = wizard.layout("tabs",{
+                maxStretchableColumns:2,
+            });
+
+            that.layout({
+                ui:"VBoxLayout",
+                items:[layout, that.create_action_buttons()]
+            });
         },
         init_torrent_layout(values)
         {
@@ -123,7 +152,7 @@ Std.ui.module("filecxx_task_edit",
                 items:[layout, that.create_action_buttons()]
             });
         },
-        init_ed2k_layout()
+        init_ed2k_layout(values)
         {
 
         },
@@ -150,7 +179,6 @@ Std.ui.module("filecxx_task_edit",
             wizard.options("*",{
                 method: "http_method",
                 uri:{ui:"TextEdit"},
-                speed_limit_download:"speed_limit",
                 file_name:{readOnly:true},
                 save_path:{readOnly:true},
                 key_mode:{ui:"ComboBox",valueType:"index",items:["Base64"]}
@@ -164,9 +192,36 @@ Std.ui.module("filecxx_task_edit",
                 items:[layout, that.create_action_buttons()]
             });
         },
-        init_ssh_layout()
+        init_ssh_layout(values)
         {
+            const fields = {
+                attributes:[
+                    "connect_timeout","max_retry","max_connections","speed_limit_download","speed_limit_upload",
+                    "user","pass",
+                    "file_name","catalog","save_path","proxy","proxy_mode",
+                    "ignore_remote_modified","ignore_server_busy","auto_rename_file","no_task_record"
+                ],
+                address:["uri"],
+            }
+            let that   = this;
+            let wizard = that.wizard_ = Std.ui.wizard(values);
 
+            wizard.fields(fields);
+            wizard.options("*",{
+                proxy:"task_proxy",
+                uri:{ui:"TextEdit"},
+                pass:"password",
+                file_name:{readOnly:true},
+                save_path:{readOnly:true}
+            });
+            let layout = wizard.layout("tabs",{
+                maxStretchableColumns:2,
+            });
+
+            that.layout({
+                ui:"VBoxLayout",
+                items:[layout, that.create_action_buttons()]
+            });
         },
         init_layout()
         {
@@ -199,7 +254,19 @@ Std.ui.module("filecxx_task_edit",
         }
     },
     public:{
+        on_save(value)
+        {
+            var that = this;
+            var opts = that.opts;
 
+            filecxx_rpc.send("task_edit",Std.extend({
+                id: opts.task_configs.id,
+                type: opts.task_configs.type
+            },value));
+
+            //console.log(opts.task_configs)
+            //console.log(value)
+        }
     },
     main:function(that,opts)
     {

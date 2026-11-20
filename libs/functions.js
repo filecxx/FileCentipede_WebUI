@@ -95,3 +95,30 @@ function extract_filename_suffix(filename)
     }
     return "";
 }
+
+/*
+ * copy_to_clipboard
+*/
+function copy_to_clipboard(text)
+{
+    const input = document.createElement('textarea');
+    input.style.position = 'fixed';
+    input.style.opacity = 0;
+    input.value = text;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('Copy');
+    document.body.removeChild(input);
+}
+
+/*
+ * error notify
+*/
+function error_notify(text)
+{
+    Std.ui("Notify").error({
+        title:lang("error"),
+        text:text,
+        timeout:"2s"
+    },{direction:"south"});
+}

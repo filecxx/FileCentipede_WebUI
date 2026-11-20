@@ -33,7 +33,7 @@ filecxx_wui.messages =
     },
     subscribes:function(msg)
     {
-        //console.log(msg)
+        filecxx_wui.data.proxy_subscribes = msg.items;
     },
     catalogs:function(msg)
     {
@@ -92,49 +92,51 @@ filecxx_wui.messages =
 
     },
 
-    "proxy_add":function(msg)
+    proxy_add:function(msg)
     {
 
     },
-    "proxy_update":function(msg)
+    proxy_update:function(msg)
     {
 
     },
-    "proxy_remove":function(msg)
+    proxy_remove:function(msg)
     {
 
     },
-    "proxy_test":function(msg)
+    proxy_test:function(msg)
     {
 
     },
-    "proxy_extractor":function(msg)
-    {
-
-    },
-
-    "http_mirror_add":function(msg)
-    {
-
-    },
-    "http_mirror_update":function(msg)
-    {
-
-    },
-    "http_mirror_remove":function(msg)
+    proxy_extractor:function(msg)
     {
 
     },
 
-    "site_rule_add":function(msg)
+    http_mirror_add:function(msg)
+    {
+        if(isWidget(filecxx_wui.accel_servers)){
+            filecxx_wui.accel_servers.append(msg);
+        }
+    },
+    http_mirror_update:function(msg)
     {
 
     },
-    "site_rule_update":function(msg)
+    http_mirror_remove:function(msg)
     {
 
     },
-    "site_rule_remove":function(msg)
+
+    site_rule_add:function(msg)
+    {
+
+    },
+    site_rule_update:function(msg)
+    {
+
+    },
+    site_rule_remove:function(msg)
     {
 
     },
@@ -156,19 +158,19 @@ filecxx_wui.messages =
 
     },
 
-    "catalog_add":function(msg)
+    catalog_add:function(msg)
     {
-
+        filecxx_wui.catalogs.on_add(msg);
     },
-    "catalog_update":function(msg)
+    catalog_update:function(msg)
     {
-
+        filecxx_wui.catalogs.on_update(msg);
     },
-    "catalog_remove":function(msg)
+    catalog_remove:function(msg)
     {
-
+        filecxx_wui.catalogs.on_remove(msg);
     },
-    "catalog_merge":function(msg)
+    catalog_merge:function(msg)
     {
 
     },
@@ -197,7 +199,7 @@ filecxx_wui.messages =
     {
         filecxx_wui.tasks.on_task_removed(msg);
     },
-    "task_move":function(msg)
+    task_move:function(msg)
     {
 
     },
@@ -205,19 +207,15 @@ filecxx_wui.messages =
     {
         filecxx_wui.tasks.on_task_renamed(msg);
     },
-    "task_redownload":function(msg)
-    {
-
-    },
     task_edit:function(msg)
     {
         filecxx_wui.run_module("modules/tasks/edit.js","filecxx_task_edit",{
             task_configs: msg
         })
     },
-    "task_set_catalog":function(msg)
+    task_set_catalog:function(msg)
     {
-
+        console.log(msg)
     },
     "task_export_torrent":function(msg)
     {

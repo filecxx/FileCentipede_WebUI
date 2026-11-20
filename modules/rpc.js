@@ -61,6 +61,7 @@ filecxx_wui.rpc =
             height:140,
             title:lang("connecting"),
             titleIcon:"icons/16/connect.svg",
+            titleMenu:false,
             modal:true,
             closable:false,
             layout:{
@@ -81,11 +82,19 @@ filecxx_wui.rpc =
         });
 
         wizard.options("*",{
-            host: {value:filecxx_rpc.config.host || "localhost"},
+            host: {value:filecxx_rpc.config.host || "localhost",label:"IP/" + lang("domain")},
             username:{placeHolder:lang("optional")},
             password:{placeHolder:lang("optional"),echoMode:"password"},
         });
 
+        let sourcecode_btn = {
+            ui:"ToolButton",
+            styleType:"textBesideIcon",
+            text:lang("source_code"),
+            icon:"icons/mimetypes/24/application-javascript.png",
+            target:"_blank",
+            href:"https://github.com/filecxx/FileCentipede_WebUI"
+        };
         let conn_btn = {
             ui:"Button",
             styleType:"textBesideIcon",
@@ -104,10 +113,11 @@ filecxx_wui.rpc =
         };
 
         that.setting_window_ = Std.ui("Window",{
-            width:340,
-            height:250,
+            width:280,
+            height:230,
             title:lang("config"),
             titleIcon:"icons/16/connect.svg",
+            titleMenu:false,
             modal:true,
             closable:false,
             layout:{
@@ -116,7 +126,7 @@ filecxx_wui.rpc =
                     wizard.layout({columnCount:2,columnSpacing:8,rowSpacing:6}),
                     {
                         ui:"HBoxLayout",
-                        items:[{ui:"stretch"}, conn_btn]
+                        items:[sourcecode_btn,{ui:"stretch"}, conn_btn]
                     }
                 ]
             }

@@ -309,44 +309,7 @@ Std.ui.module("filecxx_tasks",
                         }
                     },
                 },
-                rowContextMenu:
-                {
-                    items:[
-                        actions.start,
-                        actions.stop,
-                        {ui:"sep"},
-                        actions.rename,
-                        actions.move_to,
-                        actions.remove,
-                        {ui:"sep"},
-                        actions.open_file,
-                        actions.open_directory,
-                        {ui:"sep"},
-                        actions.redownload,
-                        actions.refresh_address,
-                        actions.edit,
-                        {ui:"sep"},
-                        {
-                            width:210,
-                            text:lang("copy"),
-                            icon:"icons/16/copy.svg",
-                            items:[
-                                {
-                                    text:"....."
-                                }
-                            ]
-                        },
-                        {
-                            text:lang("catalogs"),
-                            icon:"icons/16/directory.svg",
-                            items:[
-                                {
-                                    text:"....."
-                                }
-                            ]
-                        }
-                    ]
-                },
+                rowContextMenu: that.create_grid_contextmenu(),
                 on:{
                     columnSortStart:function(column,type)
                     {
@@ -499,6 +462,94 @@ Std.ui.module("filecxx_tasks",
                 return "";
             }
         },
+        create_grid_contextmenu()
+        {
+            let that     = this;
+            let actions  = this.actions;
+            let catalogs = function()
+            {
+                let list = [];
+
+                for(let name in filecxx_wui.data.catalogs)
+                {
+                    list.push({
+                        icon:"icons/16/directory.svg",
+                        text: lang(name),
+                        click: function(e){
+                            that.set_selected_task_catalogs(name);
+                            menu.hide()
+                        }
+                    });
+                }
+                return Std.ui("MenuItem",{
+                    text:lang("catalogs"),
+                    icon:"icons/16/directory.svg",
+                    items:list
+                });
+            }
+            let menu = Std.ui("Menu",{
+                on:{
+                    visible:function(val)
+                    {
+                        if(val === true)
+                        {
+                            if(that.grid_contextmenu_){
+                                menu.remove(that.grid_contextmenu_)
+                            }
+                            that.grid_contextmenu_ = catalogs();
+                            menu.append(that.grid_contextmenu_);
+                        }
+                    }
+                },
+                items:[
+                    actions.start,
+                    actions.stop,
+                    {ui:"sep"},
+                    actions.rename,
+                    actions.move_to,
+                    actions.remove,
+                    {ui:"sep"},
+                    actions.open_file,
+                    actions.open_directory,
+                    {ui:"sep"},
+                    actions.redownload,
+                    actions.refresh_address,
+                    actions.edit,
+                    {ui:"sep"},
+                    {
+                        width:210,
+                        text:lang("copy"),
+                        icon:"icons/16/copy.svg",
+                        items:[
+                            {
+                                text:lang("name"),
+                                icon:"icons/16/copy.svg",
+                                click:function(){
+                                    that.copy_selected_tasks_attr_field("file_name");
+                                }
+                            },
+                            {
+                                text:lang("address"),
+                                icon:"icons/16/copy.svg",
+                                click:function(){
+                                    that.copy_selected_tasks_attr_field("uri","magnet");
+                                }
+                            },
+                            {
+                                text:"TODO",
+                                icon:"icons/16/copy.svg",
+                            },
+                            {
+                                text:"TODO",
+                                icon:"icons/16/copy.svg",
+                            }
+                        ]
+                    },
+                    catalogs
+                ]
+            });
+            return menu;
+        },
         /*
          * erase task
         */
@@ -525,6 +576,51 @@ Std.ui.module("filecxx_tasks",
     },
     public:
     {
+        /*
+         * copy selected tasks attr field
+        */
+        copy_selected_tasks_attr_field:function(field,candidate)
+        {
+            let that = this;
+            let text = "";
+
+            that.selected_tasks(function(row)
+            {
+                let task = that.tasks_all.get(row.data_value.id);
+
+                if(task)
+                {
+                    if(text.length > 0){
+                        text += "\r\n";
+                    }
+                    text += task[field] || task[candidate] || "";
+                }
+            });
+            copy_to_clipboard(text);
+        },
+        /*
+         * set selected task catalogs
+        */
+        set_selected_task_catalogs:function(catalog_name)
+        {
+            let that = this;
+            let rows = that.grid_.selectedRows(true);
+
+            Std.each(rows,function(i,row)
+            {
+                filecxx_rpc.send("task_set_catalog",{
+                    id:row.data_value.id,
+                    type:row.data_value.values.type,
+                    catalog:catalog_name
+                });
+                if(that.tasks_all.has(row.data_value.id)){
+                    let task = that.tasks_all.get(row.data_value.id);
+                    row.data_value.catalog = catalog_name;
+                    task.catalog = catalog_name;
+                }
+            });
+            that.grid_.updateContainer();
+        },
         /*
          * selected tasks
         */
@@ -618,20 +714,6 @@ Std.ui.module("filecxx_tasks",
             filecxx_rpc.send("task_remove",{id:id, type:type, delete_file: delete_file});
         },
 
-        /*
-         * start_selected_tasks
-        */
-        start_selected_tasks:function()
-        {
-
-        },
-        /*
-         * stop_selected_tasks
-        */
-        stop_selected_tasks:function()
-        {
-
-        },
         /*
          * edit_selected_tasks
         */

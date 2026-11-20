@@ -5,14 +5,26 @@ Std.ui.module("filecxx_site_rules",
         width:620,
         height:310,
         modal:true,
+        maximizable:true,
+        acceptEsc:true,
         title:lang("site_rules"),
         titleIcon:"icons/16/favorites.svg",
     },
     public:{
+        init_layout:function()
+        {
+            var that = this;
 
+            that.layout({
+                ui:"VBoxLayout",
+                items:[
+                    {ui:"Label",text:"TODO"}
+                ]
+            })
+        }
     },
     main:function(that,opts)
     {
-
+        that.init_layout();
     }
 });

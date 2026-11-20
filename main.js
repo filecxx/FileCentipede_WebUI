@@ -59,6 +59,12 @@ Std.ui.module("filecxx_webui",
         init_menubar:function()
         {
             let that = this;
+            let add_task_act = function(name,type)
+            {
+                return filecxx_wui.module_action(name,"icons/24/add.svg","modules/tasks/add.js","filecxx_task_add",{
+                    type:type
+                })
+            }
 
             that.menubar_ = Std.ui("MenuBar",
             {
@@ -71,9 +77,9 @@ Std.ui.module("filecxx_webui",
                                 icon:"icons/16/add_file.svg"
                             },
                             {ui:"sep"},
-                            filecxx_wui.module_action("add","icons/24/add.svg","modules/tasks/add.js","filecxx_task_add"),
-                            filecxx_wui.module_action("add_directory","icons/24/add.svg","modules/tasks/add_directory.js","filecxx_task_add_directory"),
-                            filecxx_wui.module_action("add_stream","icons/24/stream.svg","modules/tasks/add_stream.js","filecxx_task_add_stream"),
+                            add_task_act("add","add_task"),
+                            add_task_act("add_directory","add_directory"),
+                            add_task_act("add_stream","add_stream"),
                             {ui:"sep"},
                             {
                                 text:lang("exit"),
@@ -298,14 +304,80 @@ Std.ui.module("filecxx_webui",
 
         init_animation:function()
         {
+            var on_maximize = function(callback,e)
+            {
+                let that         = this;
+                let offsetParent = that[0].offsetParent();
+
+                if(offsetParent.contains("body")){
+                    offsetParent = Std.dom(window);
+                }
+                that[0].css("visibility","hidden");
+
+                let shadow = newDiv("StdUI StdUI_Panel StdUI_Window").css({
+                    left: e.left,
+                    top: e.top,
+                    width: e.width,
+                    height: e.height,
+                    opacity: 0.6,
+                    zIndex: ++Std.ui.status.zIndex
+                }).appendTo(that[0].parent())
+
+                shadow.animateTo({
+                    left:0,
+                    top:0,
+                    opacity: 0.9,
+                    width: offsetParent.outerWidth(),
+                    height: offsetParent.outerHeight(),
+                },{
+                    duration:120,
+                    timingFunction:"ease",
+                    on:{
+                        complete:function(){
+                            that[0].removeStyle("visibility");
+                            that[0].focus();
+
+                            shadow.remove();
+                            callback();
+                        }
+                    }
+                });
+            };
+            var on_restore = function(callback,e)
+            {
+                let that   = this;
+                let scaleX = e.width / this[0].width();
+                let scaleY = e.height / this[0].height();
+
+                that[0].css({filter:"blur(10px)",transform:"scale(1,1)"}).animateTo({
+                    filter:"blur(5px)",
+                    transform: `scale(${scaleX}, ${scaleY})`
+                },{
+                    duration:100,
+                    timingFunction:"ease",
+                    on:{
+                        complete:function(){
+                            that[0].removeStyle(["filter","transform"]);
+                            callback();
+                        }
+                    }
+                });
+            };
             var on_create = function()
             {
-                this[0].css({opacity:0.5, transform:"scale(0.6)"}).animateTo({
+                let that = this;
+
+                that[0].css({opacity:0.5, transform:"scale(0.6)"}).animateTo({
                     opacity:1,
                     transform:"scale(1.0)"
                 },{
-                    duration:60,
+                    duration:65,
                     timingFunction:"ease-in",
+                    on:{
+                        complete:function(){
+                            that[0].removeStyle("opacity");
+                        }
+                    }
                 })
             }
             var on_close = function(callback)
@@ -314,21 +386,30 @@ Std.ui.module("filecxx_webui",
                     opacity:0,
                     transform:"scale(0.8)"
                 },{
-                    duration:50,
+                    duration:80,
                     timingFunction:"ease-out",
                 },callback)
             };
 
+            Std.ui("Window").opts({
+                on:{create:on_create},
+                animation: {
+                    maximize:on_maximize,
+                    restore:on_restore,
+                    close:on_close
+                }
+            });
+            Std.ui("MessageBox").opts({
+                animation: {
+                    destroy:on_close
+                }
+            });
             Std.ui("locker").opts({
                 animation: {
                     destroy:function(callback) {
                         this[0].animateTo({opacity:0},{duration:80, timingFunction:"ease-out",},callback)
                     }
                 }
-            });
-            Std.ui("Window").opts({
-                on:{create:on_create},
-                animation: {close:on_close}
             });
         }
     },
@@ -383,6 +464,7 @@ Std.main.hold(function(holder,handler)
 */
 Std.main(function()
 {
+    filecxx_wui.init_iconset();
     filecxx_wui.init_wizard_options();
     filecxx_wui.groups   = Std.ui("filecxx_groups",{});
     filecxx_wui.catalogs = Std.ui("filecxx_catalogs",{});

@@ -57,10 +57,7 @@ Std.ui.module("filecxx_settings",
                     enable:false,
                     items:[lang("auto_rename_file"),lang("skip")]
                 },
-                proxy:{
-                    ui:"ComboBox",
-                    editable:false
-                },
+                proxy:"task_proxy",
                 client_fingerprint_type:{
                     ui:"ComboBox",
                     valueType:"index",

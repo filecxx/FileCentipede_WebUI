@@ -5,6 +5,7 @@ Std.ui.module("filecxx_speed_limit_upload",
         width:500,
         height:250,
         modal:true,
+        acceptEsc:true,
         title:lang("speed_limit_upload"),
     },
     extend:{

@@ -3,6 +3,7 @@ var filecxx_wui =
     version: 0.10,
     version_backend: 0,
     data:{},
+    iconset:{},
     global_status:null,
 
     play_mp3(src)
@@ -34,6 +35,18 @@ var filecxx_wui =
             Std.ui(entry,(opts && isObject(opts)) ? opts : {})
         });
     },
+    init_iconset:function()
+    {
+        this.iconset["data_table"] = {
+            cancel:"icons/16/cancel.svg",
+            add:"icons/24/add.svg",
+            edit:"icons/24/edit.svg",
+            remove:"icons/24/delete.svg",
+            clear:"icons/24/delete_all.svg",
+            refresh:"icons/24/refresh.svg",
+            copy:"icons/24/save.svg",
+        };
+    },
     init_wizard_options:function()
     {
         Std.ui.wizard.options({
@@ -47,7 +60,41 @@ var filecxx_wui =
                 echoMode:"password"
             },
             catalog:{
-                ui:"ComboBox"
+                ui:"ComboBox",
+                valueType:"item",
+                items: function()
+                {
+                    let list = [{text:" --- ", value:""}];
+
+                    for(let name in filecxx_wui.data.catalogs)
+                    {
+                        list.push({icon:"icons/24/catalog.svg",
+                            iconWidth:24,
+                            iconHeight:24,
+                            text: lang(name), value: name
+                        });
+                    }
+                    return list;
+                }
+            },
+            task_proxy:{
+                ui:"ComboBox",
+                valueType:"item",
+                items: function(){
+                    let list = [
+                        {text:lang("no_proxy"),value:0},
+                        {text:lang("OS_setting"),value:"@os"},
+                    ];
+                    for(let name in filecxx_wui.data.proxies){
+                        list.push({text: lang(name), value: name});
+                    }
+                    return list;
+                }
+            },
+            proxy_type:{
+                ui:"ComboBox",
+                valueType:"text",
+                items:["SOCKS5","HTTP","HTTPS","SOCKS5S"]
             },
             proxy_mode:{
                 ui:"ComboBox",
@@ -86,36 +133,35 @@ var filecxx_wui =
             headers:{
                 ui:"TextEdit"
             },
+            connect_timeout:{
+                label:"ms",
+                min: 200
+            },
             speed_limit:{
-                ui:"LineEdit",
-                type:"int",
+                type:"uint",
                 label:"KB/s",
-                labelSide:"right"
             },
             speed_limit_download:{
-                ui:"LineEdit",
-                type:"int",
+                type:"uint",
                 label:"KB/s",
-                labelSide:"right"
             },
             speed_limit_upload:{
-                ui:"LineEdit",
-                type:"int",
+                type:"uint",
                 label:"KB/s",
-                labelSide:"right"
             },
             seeding_limit_speed_limit:{
-                ui:"LineEdit",
-                type:"int",
+                type:"uint",
                 label:"KB/s",
-                labelSide:"right"
             },
             seeding_limit_act:{
                 ui:"ComboBox",
                 valueType:"index",
-                items:["none","stop","speed_limit","delete_task","delete_task_and_file"]
+                items:[lang("none"),lang("stop"),lang("speed_limit"),lang("delete_task"),lang("delete_task_and_file")]
             },
-
+            date_time:{
+                ui:"DateTimeEdit",
+                valueType:"timestamp"
+            },
             mirror_hosts:{
                 ui:"TextEdit",
                 placeHolder:lang("http_mirrors_placeholder")
@@ -192,7 +238,10 @@ filecxx_wui.lang =
         mirror_hosts:"hosts",
         operation_always:"always",
         operation_seeding:"seeding",
-        attr_last_modified:"last_modified_time"
+        attr_last_modified:"last_modified_time",
+        pass:"password",
+        creation_time_begin:"begin",
+        creation_time_end:"end",
     },
     parse:function(text)
     {

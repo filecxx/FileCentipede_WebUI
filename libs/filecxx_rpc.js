@@ -40,11 +40,15 @@ var filecxx_rpc =
     {
         if(this.websocket_ && this.established_)
         {
+            let data = null;
+
             if(!json){
-                json = {};
+                data = {};
+            }else{
+                data = Std.extend({},json);
             }
-            json["@"] = message_type;
-            this.websocket_.send(JSON.stringify(json));
+            data["@"] = message_type;
+            this.websocket_.send(JSON.stringify(data));
         }
     },
     connect:function()

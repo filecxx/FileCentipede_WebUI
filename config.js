@@ -65,7 +65,8 @@ var filecxx_wui =
                 type:"uint",
             },
             password:{
-                echoMode:"password"
+                //echoMode:"password",  //fuck chrome
+                css:{"-webkit-text-security": "disc"}
             },
             catalog:{
                 ui:"ComboBox",

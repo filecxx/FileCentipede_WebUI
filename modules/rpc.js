@@ -110,7 +110,7 @@ filecxx_wui.rpc =
         wizard.options("*",{
             host: {value:filecxx_rpc.config.host || "localhost",label:"IP/" + lang("domain")},
             username:{placeHolder:lang("optional")},
-            password:{placeHolder:lang("optional"),echoMode:"password"},
+            password:{placeHolder:lang("optional"),css:{"-webkit-text-security": "disc"}},
         });
 
         let sourcecode_btn = {

@@ -61,7 +61,7 @@ var filecxx_rpc =
         try{
             that.websocket_ = new WebSocket(url);
         }catch(e){
-            that.on_error && that.on_error(e);
+            that.on_error && that.on_error(e.message);
             return;
         }
 

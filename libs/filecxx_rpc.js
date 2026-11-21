@@ -24,6 +24,7 @@ var filecxx_rpc =
     on_error:null,
 
     //--------private
+    connect_timeout_: 3000, //ms
     timer_:null,
     websocket_:null,
     established_:false,
@@ -57,7 +58,13 @@ var filecxx_rpc =
         let protocol = that.config.ssl ? "wss" : "ws";
         let url      =  protocol + '://' + that.config.host + ":" + that.config.port + "/wsc";
 
-        that.websocket_ = new WebSocket(url);
+        try{
+            that.websocket_ = new WebSocket(url);
+        }catch(e){
+            that.on_error && that.on_error(e);
+            return;
+        }
+
         that.websocket_.binaryType = 'arraybuffer';
         that.websocket_.onopen = (event) =>
         {
@@ -106,7 +113,7 @@ var filecxx_rpc =
         };
         that.timer_ = setTimeout(function(){
             that.close();
-        },1500);
+        },that.connect_timeout_);
     },
     close:function()
     {

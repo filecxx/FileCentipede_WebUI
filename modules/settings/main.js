@@ -137,14 +137,6 @@ Std.ui.module("filecxx_settings",
                 width:800,
                 height:600,
                 items:items,
-            }).on("render",function()
-            {
-                this.parent().plugin("resize",{
-                    helper:"original",
-                    opacity:1,
-                    left:false,
-                    top:false
-                })
             });
             //console.log(filecxx_wui.data.configs)
         },

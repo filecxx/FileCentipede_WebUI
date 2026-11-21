@@ -85,6 +85,7 @@ filecxx_wui.rpc =
     show_connector:function(callback)
     {
         let that   = this;
+        let url    = new URL(window.location.href);
         let wizard = Std.ui.wizard(filecxx_rpc.config,{
             layout:"GridLayout"
         });
@@ -119,10 +120,32 @@ filecxx_wui.rpc =
                 }
             }
         };
+        let switch_protocol = Std.ui("SwitchBox",{
+            level:3,
+            height:26,
+            theme:"blue",
+            valueType:"value",
+            items:[
+                {
+                    text:"HTTP",
+                    value:false,
+                },
+                {
+                    text:"HTTPS",
+                    value:true
+                }
+            ],
+            value: url.protocol.startsWith("https:"),
+            on:{
+                change:function(val){
+                    window.location.href = (val ? "https:" : "http:") + "//" + url.host + url.pathname + url.search + url.hash
+                }
+            }
+        });
 
         that.setting_window_ = Std.ui("Window",{
-            width:280,
-            height:230,
+            width:300,
+            height:285,
             title:lang("config"),
             titleIcon:"icons/16/connect.svg",
             titleMenu:false,
@@ -130,7 +153,9 @@ filecxx_wui.rpc =
             closable:false,
             layout:{
                 ui:"VBoxLayout",
+                spacing:12,
                 items:[
+                    switch_protocol,
                     wizard.layout({columnCount:2,columnSpacing:8,rowSpacing:6}),
                     {
                         ui:"HBoxLayout",

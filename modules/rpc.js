@@ -9,7 +9,8 @@ filecxx_wui.rpc =
 
         filecxx_rpc.on_connect = function()
         {
-            that.connecting_window_.close();
+            that.dispose_connecting();
+
             callback(filecxx_rpc.config);
         }
         filecxx_rpc.on_close = function()
@@ -18,7 +19,7 @@ filecxx_wui.rpc =
 
             setTimeout(function()
             {
-                if(that.connecting_window_.visible()){
+                if(that.connecting_window_ && that.connecting_window_.visible()){
                     that.connect(callback)
                 }else if(!filecxx_rpc.config.host){
                     that.show_connector(callback);
@@ -38,7 +39,7 @@ filecxx_wui.rpc =
         }
         filecxx_rpc.on_error = function(text)
         {
-            that.connecting_window_.close();
+            that.dispose_connecting();
 
             Std.ui("MessageBox").error({
                 text:lang(text),
@@ -51,6 +52,13 @@ filecxx_wui.rpc =
             });
         }
         filecxx_rpc.connect();
+    },
+    dispose_connecting:function()
+    {
+        let that = this;
+
+        that.connecting_window_ && that.connecting_window_.close();
+        that.connecting_window_ = null;
     },
     show_connecting:function(callback)
     {
@@ -132,7 +140,6 @@ filecxx_wui.rpc =
             }
         })
     },
-
 
     init:function(callback)
     {

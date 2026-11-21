@@ -48,9 +48,11 @@ filecxx_wui.messages =
     {
         filecxx_wui.main.on_status(msg);
     },
-    "statistics":function(msg)
+    statistics:function(msg)
     {
-
+        if(filecxx_wui.statistics){
+            filecxx_wui.statistics.on_data(msg)
+        }
     },
     "trackers":function(msg)
     {
@@ -225,13 +227,13 @@ filecxx_wui.messages =
     {
         filecxx_wui.tasks.on_task_status(msg);
     },
-    "task_progress":function(msg)
+    task_progress:function(msg)
     {
 
     },
-    "task_files":function(msg)
+    task_files:function(msg)
     {
-
+        filecxx_wui.tasks.on_task_files(msg);
     },
     "task_details":function(msg)
     {
@@ -241,17 +243,9 @@ filecxx_wui.messages =
     {
 
     },
-    "task_files_enable":function(msg)
+    task_confirm_links:function(msg)
     {
-
-    },
-    "task_confirm":function(msg)
-    {
-
-    },
-    "task_confirm_links":function(msg)
-    {
-
+        //download all
     },
 
     "task_tracker_add":function(msg)

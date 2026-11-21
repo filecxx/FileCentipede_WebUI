@@ -211,6 +211,7 @@ Std.ui.module("filecxx_tasks",
                     {name:"state",cellModel:"state",text:lang("state"),width:120},
                     {name:"download_speed",cellModel:"speed",text:lang("download_speed"),width:140},
                     {name:"upload_speed",cellModel:"speed",text:lang("upload_speed"),width:140},
+                    {name:"connections",text:lang("connections"),width:80},
                     {name:"peers",text:lang("peers"),width:80},
                     {name:"seeds",text:lang("seeds"),width:80},
                     {name:"time_left",cellModel:"duration",text:lang("time_left"),width:140},
@@ -251,10 +252,18 @@ Std.ui.module("filecxx_tasks",
                     {
                         update:function(cell,data)
                         {
-                            if(isNumber(data)){
-                                cell.html(lang(filecxx_rpc.task_state_texts[data]));
-                            }else if(isString(data)){
+                            if(isNumber(data))
+                            {
+                                if(data === filecxx_rpc.task_states.State_Error && cell.row.data.data_value.values.error_text){
+                                    data = lang(cell.row.data.data_value.values.error_text);
+                                }else{
+                                    data = lang(filecxx_rpc.task_state_texts[data]);
+                                }
+                            }
+                            if(isString(data)){
                                 cell.html(data);
+                            }else{
+                                return;
                             }
                             if(cell.row.data.color){
                                 cell.row.color(cell.row.data.color)
@@ -409,11 +418,7 @@ Std.ui.module("filecxx_tasks",
                     break;
                 }
             });
-
         },
-    },
-    private:{
-        interval_1s_:-1
     },
     protected:
     {
@@ -556,22 +561,15 @@ Std.ui.module("filecxx_tasks",
         erase_task:function(id)
         {
             let that = this;
+            let confirming = that.tasks_confirming.get(id);
 
-            that.tasks_all.delete(id + "");
-            that.tasks_active.delete(id + "");
-            that.tasks_confirming.delete(id + "");
-        },
-
-        /*
-         * on interval 1s
-        */
-        on_interval_1s:function()
-        {
-            let that = this;
-
-            that.tasks_active.forEach((task)=>{
-                filecxx_rpc.send("task_status",{id:task.id, type:task.type, extended:true})
-            });
+            if(confirming && confirming.dialog){
+                confirming.dialog.on_dispose();
+            }else{
+                that.tasks_confirming.delete(id);
+            }
+            that.tasks_all.delete(id);
+            that.tasks_active.delete(id);
         }
     },
     public:
@@ -715,6 +713,13 @@ Std.ui.module("filecxx_tasks",
         },
 
         /*
+         * remove_confirming_task
+        */
+        remove_confirming_task:function(id)
+        {
+            this.tasks_confirming.delete(id);
+        },
+        /*
          * edit_selected_tasks
         */
         edit_selected_tasks:function()
@@ -777,22 +782,35 @@ Std.ui.module("filecxx_tasks",
         */
         update_task:function(values)
         {
-            let that  = this;
-            let tasks = that.tasks_all;
-            let grid  = that.grid_;
+            let that = this;
+            let grid = that.grid_;
+            let task = that.tasks_all.get(values.id);
 
-            if(!tasks.has(values.id)){
+            if(!task){
                 return false;
             }
-            let task = tasks.get(values.id);
+            if(values.substate === filecxx_rpc.task_substates.Substate_Confirming){
+                that.on_task_confirming(values.id,values.type,values);
+                return true;
+            }
+            let confirming = that.tasks_confirming.get(values.id);
+
+            if(confirming && confirming.dialog)
+            {
+                if(task.substate !== filecxx_rpc.task_substates.Substate_Confirming){
+                    confirming.dialog.on_dispose();
+                }
+            }
+            if(values.state !== task.state){
+                that.on_task_state_change(values.state);
+            }
             Std.extend(task,values);
 
             let row = grid.row(values.id + "");
-
+            //values.error;
             if(row)
             {
                 let owner = grid.row(values.id + "",true);
-
                 row.color             = that.row_color(row.data_value.values.state);
                 row.data_value.folder = that.is_folder(values);
 
@@ -827,6 +845,7 @@ Std.ui.module("filecxx_tasks",
                 color: that.row_color(state),
                 cells: values
             },index);
+            //values.error;
 
             that.tasks_all.set(id,values);
 
@@ -858,6 +877,17 @@ Std.ui.module("filecxx_tasks",
 
         ///------------------
         /*
+         * on_task_state_change
+        */
+        on_task_state_change:function(state)
+        {
+            if(state === filecxx_rpc.task_states.State_Completed){
+                filecxx_wui.play_mp3("sounds/transfer_completed.mp3");
+            }else if(state === filecxx_rpc.task_states.State_Error){
+                filecxx_wui.play_mp3("sounds/transfer_error.mp3");
+            }
+        },
+        /*
          * task status
         */
         on_task_status:function(values)
@@ -865,9 +895,113 @@ Std.ui.module("filecxx_tasks",
             if(!this.update_task(values)){
                 this.add_task(values);
             }
-            setTimeout(function(){
-                //this.grid_.sortColumn()
-            },1000);
+        },
+        /*
+         * on_task_files
+        */
+        on_task_files:function(values)
+        {
+            let that       = this;
+            let confirming = that.tasks_confirming.get(values.id);
+
+            if(confirming && confirming.dialog)
+            {
+                if(values.type === filecxx_rpc.task_types.Task_Torrent){
+                    confirming.dialog.update_files(values);
+                }
+            }else{
+                //todo: update task grid files
+            }
+        },
+        /*
+         * on_task_confirming
+        */
+        on_task_confirming:function(id,task_type,attrs)
+        {
+            let that   = this;
+            let active = that.tasks_active.get(id);
+
+            if(active && active.confirmed){
+                return;
+            }
+            let module_path  = "";
+            let module_entry = "";
+
+            switch(task_type)
+            {
+            case filecxx_rpc.task_types.Task_HTTP:
+                if(that.tasks_confirming.has(id)){
+                    return;
+                }
+                module_path  = ["modules/tasks/confirm_base.js","modules/tasks/confirm_http.js"]
+                module_entry = "filecxx_task_confirm_http";
+                break;
+            case filecxx_rpc.task_types.Task_FTP:
+                break;
+            case filecxx_rpc.task_types.Task_Torrent:
+                if(that.tasks_confirming.has(id)){
+                    let task = that.tasks_confirming.get(id);
+                    task.dialog && task.dialog.update(attrs);
+                    return;
+                }
+                module_path  = ["modules/tasks/confirm_base.js","modules/tasks/confirm_torrent.js"]
+                module_entry = "filecxx_task_confirm_torrent";
+                break;
+            case filecxx_rpc.task_types.Task_Ed2k:
+                break;
+            case filecxx_rpc.task_types.Task_Stream:
+                if(that.tasks_confirming.has(id)){
+                    let task = that.tasks_confirming.get(id);
+                    task.dialog && task.dialog.update(attrs);
+                    return;
+                }
+                module_path  = ["modules/tasks/confirm_base.js","modules/tasks/confirm_stream.js"]
+                module_entry = "filecxx_task_confirm_stream";
+                break;
+            case filecxx_rpc.task_types.Task_SSH:
+                break;
+            default:
+                console.assert(false,"data error");
+            }
+            if(!module_path){
+                console.assert(false,"add_confirming_task: internal error");
+                return;
+            }
+            that.tasks_confirming.set(id,{type: task_type,dialog: null});
+
+            //loadFiles: ["xx","yy"], loadQueue: [["xx","yy"]]
+            filecxx_wui.run_module([module_path],module_entry,
+            {
+                task_id: id,
+                attrs: attrs,
+                on:{
+                    create:function(){
+                        that.tasks_confirming.set(id,{type: task_type,dialog: this});
+                    }
+                }
+            });
+        },
+        /*
+         * on_task_confirmed
+        */
+        on_task_confirmed:function(id)
+        {
+            let that       = this;
+            let active     = that.tasks_active.get(id);
+            let confirming = that.tasks_confirming.get(id);
+
+            if(active){
+                active.confirmed = true;
+            }
+            if(confirming)
+            {
+                //filecxx_rpc.send("task_status",{id:id, type:active.type})
+
+                if(confirming.dialog){
+                    confirming.dialog.on_dispose();
+                }
+                that.tasks_confirming.delete(id);
+            }
         },
         /*
          * on_task_renamed
@@ -911,6 +1045,23 @@ Std.ui.module("filecxx_tasks",
                 grid.removeRow(index);
             }
         },
+        /*
+         * on interval
+        */
+        on_interval:function()
+        {
+            let that = this;
+
+            that.tasks_confirming.forEach((task,id)=>
+            {
+                if(task.type === filecxx_rpc.task_types.Task_Torrent){
+                    filecxx_rpc.send("task_status",{id:task.id, type:task.type})
+                }
+            });
+            that.tasks_active.forEach((task)=>{
+                filecxx_rpc.send("task_status",{id:task.id, type:task.type, extended:true})
+            });
+        }
     },
     main:function(that,opts)
     {
@@ -918,9 +1069,6 @@ Std.ui.module("filecxx_tasks",
         that.tasks_active     = new Map;
         that.tasks_confirming = new Map;
         that.hidden_rows  = [];
-        that.interval_1s_ = setInterval(function(){
-            that.on_interval_1s();
-        },1000);
 
         that.init_layout();
         that.init_actions();

@@ -79,6 +79,9 @@ http://test.filecxx.com/stream/1.mpd
             let opts = that.opts;
             let mode = 0;
 
+            if(!that.addresses_){
+                return;
+            }
             that.addresses_.split("\n").each((_,line)=>
             {
                 let uri      = line.trim();
@@ -129,7 +132,7 @@ http://test.filecxx.com/stream/1.mpd
                             that.timer_change_ = setTimeout(function(){
                                 that.on_change(val)
                                 that.timer_change_ = -1;
-                            },500);
+                            },200);
                         }
                     }
                 },

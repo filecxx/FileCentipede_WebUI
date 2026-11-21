@@ -85,7 +85,7 @@ var filecxx_rpc =
                     }else{
                         that.close(); //invalid message
                     }
-                }else{
+                }else if(event.data.length > 0){
                     that.on_message && that.on_message(JSON.parse(event.data));
                 }
             };
@@ -117,6 +117,7 @@ var filecxx_rpc =
         }
     },
 
+
     ///-----------------------------
     task_types :
     {
@@ -129,7 +130,7 @@ var filecxx_rpc =
 
         Task_Types_Size : 6
     },
-    task_modes:
+    task_modes: //if(mode & task_modes.Task_Mode_Directory){.....}
     {
         Task_Mode_Encrypted_URI:   1 << 0,
         Task_Mode_Custom_Protocol: 1 << 1,
@@ -176,6 +177,13 @@ var filecxx_rpc =
         Substate_Renaming            : 5,
         Substate_Renaming_Directory  : 6,
         Substate_Redownloading       : 7
+    },
+    stream_filetype:
+    {
+        Stream_File_TS       : 0,
+        Stream_File_Video    : 1,
+        Stream_File_Audio    : 2,
+        Stream_File_Subtitle : 3,
     },
 
     task_type_texts: [

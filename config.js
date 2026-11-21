@@ -8,8 +8,15 @@ var filecxx_wui =
 
     play_mp3(src)
     {
-        const audio = new Audio(src);
-        audio.play().catch(error => {});
+        let that = this;
+
+        try{
+            if(that.audio_){
+                that.audio_.pause();
+            }
+            that.audio_ = new Audio(src);
+            that.audio_.play().catch(err => {});
+        }catch(e){}
     },
     module_action(text,icon,path,entry,opts)
     {
@@ -29,8 +36,9 @@ var filecxx_wui =
             cursor:"wait",
             opacity:0
         });
+        var loader = new Std.loader;
 
-        Std.loader.js(path,function(){
+        loader.loadFiles(path,function(){
             locker.remove();
             Std.ui(entry,(opts && isObject(opts)) ? opts : {})
         });
@@ -90,6 +98,11 @@ var filecxx_wui =
                     }
                     return list;
                 }
+            },
+            stream_key_mode:{
+                ui:"ComboBox",
+                valueType:"index",
+                items:["Base64"]
             },
             proxy_type:{
                 ui:"ComboBox",
@@ -242,6 +255,13 @@ filecxx_wui.lang =
         pass:"password",
         creation_time_begin:"begin",
         creation_time_end:"end",
+        torrent_comment:"comment",
+        skip_localhost_pass:"skip_localhost_password_authentication",
+        skip_http_server_auth:"skip_http_server_authentication",
+        seeding_limit_ratio:"ratio_reached",
+        seeding_limit_minutes:"duration_reached",
+        seeding_limit_size:"size_reached",
+        seeding_limit_act:"action"
     },
     parse:function(text)
     {

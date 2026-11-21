@@ -291,6 +291,12 @@ Std.ui.module("filecxx_webui",
                     filecxx_rpc.send("status");
                 }
             },500);
+
+            that.tasks_interval_ = setInterval(function(){
+                if(filecxx_rpc.is_established()){
+                    filecxx_wui.tasks.on_interval();
+                }
+            },1000);
         },
         init_keyboard:function()
         {
@@ -478,7 +484,7 @@ Std.main(function()
         filecxx_wui.main.width(this.width());
         filecxx_wui.main.height(this.height());
     });
-    Std.dom("title").text(filecxx_wui.lang.format('${software_name_} WebUI ' + filecxx_wui.version.toFixed(2)));
+    Std.dom("title").text('FileCXX WebUI ' + filecxx_wui.version.toFixed(2));
 
     try{
         let url = new URL(window.location.href);

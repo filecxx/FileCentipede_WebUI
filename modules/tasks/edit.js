@@ -181,7 +181,7 @@ Std.ui.module("filecxx_task_edit",
                 uri:{ui:"TextEdit"},
                 file_name:{readOnly:true},
                 save_path:{readOnly:true},
-                key_mode:{ui:"ComboBox",valueType:"index",items:["Base64"]}
+                key_mode:"stream_key_mode"
             });
             let layout = wizard.layout("tabs",{
                 maxStretchableColumns:2,

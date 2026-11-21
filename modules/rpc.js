@@ -2,6 +2,8 @@ filecxx_wui.rpc =
 {
     setting_window_: null,
     connecting_window_: null,
+    connecting_window_msg_: null,
+    reconnecting_total_: 0,
 
     connect:function(callback)
     {
@@ -10,7 +12,6 @@ filecxx_wui.rpc =
         filecxx_rpc.on_connect = function()
         {
             that.dispose_connecting();
-
             callback(filecxx_rpc.config);
         }
         filecxx_rpc.on_close = function()
@@ -20,6 +21,7 @@ filecxx_wui.rpc =
             setTimeout(function()
             {
                 if(that.connecting_window_ && that.connecting_window_.visible()){
+                    that.connecting_window_msg_.html(lang("connect_failed")  + ": " + lang("restarting")+ ` (${that.reconnecting_total_++})`);
                     that.connect(callback)
                 }else if(!filecxx_rpc.config.host){
                     that.show_connector(callback);
@@ -58,25 +60,39 @@ filecxx_wui.rpc =
         let that = this;
 
         that.connecting_window_ && that.connecting_window_.close();
-        that.connecting_window_ = null;
+        that.connecting_window_     = null;
+        that.connecting_window_msg_ = null;
+        that.reconnecting_total_    = 0;
     },
     show_connecting:function(callback)
     {
         let that = this;
 
+        that.connecting_window_msg_ = Std.ui("widget",{
+            html:"...",
+            height: 35,
+            level:3,
+            css:{textAlign: "center",marginTop:8,color:"red"}
+        })
         that.connecting_window_ = Std.ui("Window",{
-            width:200,
-            height:140,
+            width:250,
+            height:150,
             title:lang("connecting"),
             titleIcon:"icons/16/connect.svg",
             titleMenu:false,
             modal:true,
             closable:false,
             layout:{
-                ui:"HBoxLayout",
+                ui:"VBoxLayout",
                 items:[
-                    {ui:"Image",width:64,height:72,src:"images/loading/clock.gif"},
-                    {ui:"Label",textAlign:"middle",text:lang("connecting") + "...."}
+                    {
+                        ui:"HBoxLayout",
+                        items:[
+                            {ui:"Image",width:64,height:72,src:"images/loading/clock.gif"},
+                            {ui:"Label",textAlign:"middle",text:lang("connecting") + "...."},
+                        ]
+                    },
+                    that.connecting_window_msg_
                 ]
             }
         });
@@ -86,6 +102,7 @@ filecxx_wui.rpc =
     {
         let that   = this;
         let url    = new URL(window.location.href);
+        let https  = url.protocol.startsWith("https:");
         let wizard = Std.ui.wizard(filecxx_rpc.config,{
             layout:"GridLayout"
         });
@@ -120,6 +137,7 @@ filecxx_wui.rpc =
                 }
             }
         };
+        let form = wizard.layout({columnCount:2,columnSpacing:8,rowSpacing:6});
         let switch_protocol = Std.ui("SwitchBox",{
             level:3,
             height:26,
@@ -138,13 +156,19 @@ filecxx_wui.rpc =
             value: url.protocol.startsWith("https:"),
             on:{
                 change:function(val){
+                    if(val){
+                        wizard.get("ssl").value(true);
+                    }
                     window.location.href = (val ? "https:" : "http:") + "//" + url.host + url.pathname + url.search + url.hash
                 }
             }
         });
+        if(https){
+            wizard.get("ssl").value(true);
+        }
 
         that.setting_window_ = Std.ui("Window",{
-            width:300,
+            width:320,
             height:285,
             title:lang("config"),
             titleIcon:"icons/16/connect.svg",
@@ -156,7 +180,7 @@ filecxx_wui.rpc =
                 spacing:12,
                 items:[
                     switch_protocol,
-                    wizard.layout({columnCount:2,columnSpacing:8,rowSpacing:6}),
+                    form,
                     {
                         ui:"HBoxLayout",
                         items:[sourcecode_btn,{ui:"stretch"}, conn_btn]

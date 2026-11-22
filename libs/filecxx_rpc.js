@@ -1,8 +1,14 @@
 /*
+ * [websocket RPC]
  * step1: connect
  * step2: send auth, {"@":"wsc",username:"xxxx",password:"****"}
  * step3: receive auth message, check json.state === "success"
  * step4: receive real messages from the backend
+ *
+ * [HTTP task push & query]
+ * add task: http_task_push
+ * query task status: http_task_query
+ *
 */
 
 var filecxx_rpc =
@@ -17,11 +23,11 @@ var filecxx_rpc =
         username:"",
         password:"",
     },
-    on_open:null,
-    on_connect:null,
-    on_close:null,
-    on_message:null,
-    on_error:null,
+    on_open:null,    //function()
+    on_connect:null, //function(object)
+    on_close:null,   //function()
+    on_message:null, //function(object)
+    on_error:null,   //function(string)
 
     //--------private
     connect_timeout_: 3000, //ms
@@ -30,33 +36,16 @@ var filecxx_rpc =
     established_:false,
 
 
-    //-----------------
+    //-----------is established
     is_established:function(){
         return this.established_;
     },
 
-
-    //-----------------
-    send:function(message_type,json)
-    {
-        if(this.websocket_ && this.established_)
-        {
-            let data = null;
-
-            if(!json){
-                data = {};
-            }else{
-                data = Std.extend({},json);
-            }
-            data["@"] = message_type;
-            this.websocket_.send(JSON.stringify(data));
-        }
-    },
+    //-----------connect
     connect:function()
     {
-        let that     = this;
-        let protocol = that.config.ssl ? "wss" : "ws";
-        let url      =  protocol + '://' + that.config.host + ":" + that.config.port + "/wsc";
+        let that = this;
+        let url  = (that.config.ssl ? "wss" : "ws") + '://' + (that.config.host || "localhost") + ":" + that.config.port + "/wsc";
 
         try{
             that.websocket_ = new WebSocket(url);
@@ -115,13 +104,136 @@ var filecxx_rpc =
             that.close();
         },that.connect_timeout_);
     },
+
+    //-----------close
     close:function()
     {
-        let that = this;
-
-        if(that.websocket_){
-            that.websocket_.close();
+        if(this.websocket_){
+            this.websocket_.close();
         }
+    },
+
+    //-----------send message
+    send:function(message_type,json)
+    {
+        if(this.websocket_ && this.established_)
+        {
+            let data = {};
+
+            if(json && typeof(json) === "object")
+            {
+                for(var name in json){
+                    data[name] = json[name];
+                }
+            }
+            data["@"] = message_type;
+            this.websocket_.send(JSON.stringify(data));
+        }
+    },
+
+    //-----------task type to number or string
+    task_type:function(type)
+    {
+        let types = this.task_types;
+
+        if(typeof(type) === "number")
+        {
+            if(type < types.Task_Types_Size){
+                return this.task_type_texts[type];
+            }
+        }else if(typeof(type) === "string")
+        {
+            switch(type)
+            {
+            case "http":
+                return types.Task_HTTP;
+            case "ftp":
+                return types.Task_FTP;
+            case "torrent":
+                return types.Task_Torrent;
+            case "ed2k":
+                return types.Task_Ed2k;
+            case "stream":
+                return types.Task_Stream;
+            case "ssh":
+                return types.Task_SSH;
+            }
+        }
+        return null;
+    },
+
+
+    //-----------http fetch
+    http_fetch:function(body,callback)
+    {
+        const config     = this.config;
+        const url        = (config.ssl ? "https" : "http") + "://" + (config.host || "localhost") + ":" + config.port + "/request";
+        const controller = new AbortController();
+        const id         = setTimeout(() => controller.abort({message:"timeout"}), this.connect_timeout_ || 3000);
+        const headers    = {
+            authorization: (function(){
+                const str = Array.from(new TextEncoder().encode(config.username + ":" + config.password),(byte) => String.fromCodePoint(byte)).join("");
+                return "Basic " + btoa(str);
+            })()
+        };
+
+        fetch(url,{signal: controller.signal, headers: headers, method: "FILEC", body:body}).then(function(response)
+        {
+            if(response.status !== 200){
+                callback && callback({error:8,error_text:"response_code_error",response_code:response.status});
+            }
+            clearTimeout(id);
+            return response.text();
+        }).then(data =>{
+            callback(data);
+        }).catch(function(e){
+            clearTimeout(id);
+            callback && callback({error:121,error_text:e.message || e.name || "error"});
+        });
+    },
+
+
+    //-----------http task push
+    http_task_push:function(type,options,callback)
+    {
+        let values = {};
+
+        if(typeof(type) !== "string" || typeof(options) !== "object" || typeof(options.uri) !== "string"){
+            return callback && callback({error:133,error_text:"invalid arguments"});
+        }
+        switch(type)
+        {
+        case "http":
+        case "ftp":
+        case "torrent":
+        case "ed2k":
+        case "ssh":
+            values["@"] = "task_add";
+            break;
+        case "stream":
+            values["@"] = "task_add_stream";
+            break
+        default:
+            return callback && callback({error:133,error_text:"invalid type"});
+        }
+        for(let name in options){
+            values[name] = options[name];
+        }
+        this.http_fetch(JSON.stringify(values),callback);
+    },
+    http_task_query:function(type,id,callback)
+    {
+        let task_type = this.task_type(type);
+
+        if(task_type === null){
+            return callback && callback({error:133,error_text:"invalid type"});
+        }
+        if(typeof(id) !== "number"){
+            return callback && callback({error:133,error_text:"invalid arguments"});
+        }
+        let values = {"@":"task_status","type":task_type,"extended":true};
+
+        this.http_fetch(JSON.stringify(values),callback);
     },
 
 

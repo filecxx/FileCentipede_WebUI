@@ -60,6 +60,7 @@ Std.ui.module("filecxx_task_edit",
                 attributes:[
                     "method","connect_timeout","max_retry","max_connections","max_redirect","speed_limit_download",
                     "file_name","catalog","save_path","proxy","proxy_mode",
+                    "parallel",
                     "ignore_remote_modified","ignore_server_busy","ignore_http_error","auto_rename_file","no_task_record"
                 ],
                 address:["uri"],

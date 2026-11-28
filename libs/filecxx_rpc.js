@@ -10,7 +10,6 @@
  * query task status: http_task_query
  *
 */
-
 var filecxx_rpc =
 {
     version: 1.0,

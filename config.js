@@ -1,5 +1,7 @@
 var filecxx_wui =
 {
+    url_http:null,
+    url_https:null,
     version: 0.10,
     version_backend: 0,
     data:{},

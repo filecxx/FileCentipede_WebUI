@@ -159,6 +159,18 @@ filecxx_wui.rpc =
                     if(val){
                         wizard.get("ssl").value(true);
                     }
+                    if(val)
+                    {
+                        if(filecxx_wui.url_https){
+                            window.location.href = filecxx_wui.url_https;
+                            return;
+                        }
+                    }else{
+                        if(filecxx_wui.url_http){
+                            window.location.href = filecxx_wui.url_http;
+                            return;
+                        }
+                    }
                     window.location.href = (val ? "https:" : "http:") + "//" + url.host + url.pathname + url.search + url.hash
                 }
             }

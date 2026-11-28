@@ -108,7 +108,7 @@ Std.ui.module("filecxx_task_confirm_torrent",
             filecxx_wui.tasks.on_task_confirmed(id);
         },
 
-
+        ///------------------------
         query_files:function(id)
         {
             filecxx_rpc.send("task_files",{

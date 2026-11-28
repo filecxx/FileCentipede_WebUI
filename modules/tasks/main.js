@@ -7,16 +7,7 @@ Std.ui.module("filecxx_tasks",
         height:"auto",
         className: "tasks_main",
     },
-    extend:{
-        render:function(){
-            this.parent().plugin("resize",{
-                helper:"original",
-                opacity:1,
-                left:false,
-                top:false
-            });
-        }
-    },
+
     initialize:
     {
         init_layout()

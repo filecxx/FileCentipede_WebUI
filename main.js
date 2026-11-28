@@ -157,6 +157,10 @@ Std.ui.module("filecxx_webui",
                                 icon:"data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http://www.w3.org/2000/svg%22%20data-component%3D%22Octicon%22%20aria-hidden%3D%22true%22%20focusable%3D%22false%22%20class%3D%22octicon%20octicon-mark-github%22%20viewBox%3D%220%200%2024%2024%22%20width%3D%2224%22%20height%3D%2224%22%20fill%3D%22currentColor%22%20display%3D%22inline-block%22%20overflow%3D%22visible%22%20style%3D%22vertical-align:text-bottom%22%3E%3Cpath%20d%3D%22M10.226%2017.284c-2.965-.36-5.054-2.493-5.054-5.256%200-1.123.404-2.336%201.078-3.144-.292-.741-.247-2.314.09-2.965.898-.112%202.111.36%202.83%201.01.853-.269%201.752-.404%202.853-.404%201.1%200%201.999.135%202.807.382.696-.629%201.932-1.1%202.83-.988.315.606.36%202.179.067%202.942.72.854%201.101%202%201.101%203.167%200%202.763-2.089%204.852-5.098%205.234.763.494%201.28%201.572%201.28%202.807v2.336c0%20.674.561%201.056%201.235.786%204.066-1.55%207.255-5.615%207.255-10.646C23.5%206.188%2018.334%201%2011.978%201%205.62%201%20.5%206.188.5%2012.545c0%204.986%203.167%209.12%207.435%2010.669.606.225%201.19-.18%201.19-.786V20.63a2.9%202.9%200%200%201-1.078.224c-1.483%200-2.359-.808-2.987-2.313-.247-.607-.517-.966-1.034-1.033-.27-.023-.359-.135-.359-.27%200-.27.45-.471.898-.471.652%200%201.213.404%201.797%201.235.45.651.921.943%201.483.943.561%200%20.92-.202%201.437-.719.382-.381.674-.718.944-.943%22/%3E%3C/svg%3E"
                             },
                             {
+                                text:`<a class="url_link" href="http://www.filecxx.com/en_US/documentation.html#RPC" target="_blank">API</a>`,
+                                icon:"icons/16/tree.svg"
+                            },
+                            {
                                 text:lang("about"),
                                 icon:"icons/16/about.svg",
                                 click:Std.ui.module("filecxx_webui").show_about
@@ -397,6 +401,7 @@ Std.ui.module("filecxx_webui",
                 },callback)
             };
 
+
             Std.ui("Window").opts({
                 on:{create:on_create},
                 animation: {
@@ -411,9 +416,14 @@ Std.ui.module("filecxx_webui",
                 }
             });
             Std.ui("locker").opts({
+                on:{
+                    render:function(){
+                        this[0].css({opacity:0}).animateTo({opacity:this.opts.opacity},{duration:65, timingFunction:"ease-in"})
+                    }
+                },
                 animation: {
                     destroy:function(callback) {
-                        this[0].animateTo({opacity:0},{duration:80, timingFunction:"ease-out",},callback)
+                        this[0].animateTo({opacity:0},{duration:65, timingFunction:"ease-out"},callback)
                     }
                 }
             });
@@ -470,6 +480,8 @@ Std.main.hold(function(holder,handler)
 */
 Std.main(function()
 {
+    filecxx_wui.url_http  = "http://webui_http.filecxx.com";
+    filecxx_wui.url_https = "https://webui_https.filecxx.com";
     filecxx_wui.init_iconset();
     filecxx_wui.init_wizard_options();
     filecxx_wui.groups   = Std.ui("filecxx_groups",{});
